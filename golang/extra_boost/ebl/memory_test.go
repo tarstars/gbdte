@@ -1,4 +1,4 @@
-package extra_boost_lib
+package ebl
 
 import (
 	"github.com/goccy/go-graphviz"
@@ -23,7 +23,17 @@ func TestTrainModel(_ *testing.T) {
 		path.Join(baseDir, "known_future_target.npy"),
 	)
 
-	clf := NewEBooster(ematrix_train, 20, 1e-4, 6, 0.3, MseLoss{}, []EMatrix{ematrix_train, ematrix_test}, 5, 0, nil)
+	clf := NewEBooster(EBoosterParams{
+		Matrix:         ematrix_train,
+		NStages:        20,
+		RegLambda:      1e-4,
+		MaxDepth:       6,
+		LearningRate:   0.3,
+		LossKind:       MseLoss{},
+		PrintMessages:  []EMatrix{ematrix_train, ematrix_test},
+		ThreadsNum:     5,
+		UnbalancedLoss: 0,
+	})
 
 	graphViz, graph := clf.Trees[0].DrawGraph()
 	HandleError(graphViz.RenderFilename(graph, graphviz.SVG, "tree_00.svg"))

@@ -2,12 +2,11 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/tarstars/extra_bridged_boosting/golang/extra_boost/ebl"
 	"flag"
 	"github.com/goccy/go-graphviz"
 	"github.com/sbinet/npyio"
+	"github.com/tarstars/extra_bridged_boosting/golang/extra_boost/ebl"
 	"gonum.org/v1/gonum/mat"
-	"io/ioutil"
 	"log"
 	"math"
 	"os"
@@ -15,6 +14,15 @@ import (
 	"runtime"
 	"runtime/pprof"
 )
+
+func decodeConfig(srcConfig string, out interface{}) {
+	file, err := os.Open(srcConfig)
+	ebl.HandleError(err)
+	defer func() { ebl.HandleError(file.Close()) }()
+
+	decoder := json.NewDecoder(file)
+	ebl.HandleError(decoder.Decode(out))
+}
 
 func trainModel() {
 	baseDir := "/home/tass/database/app_in_the_air/demand_predictions/current_data_set"
@@ -32,7 +40,17 @@ func trainModel() {
 		path.Join(baseDir, "target_test.npy"),
 	)
 
-	clf := ebl.NewEBooster(ematrix_train, 2000, 1e-4, 6, 0.3, ebl.MseLoss{}, []ebl.EMatrix{ematrix_train, ematrix_test}, 40, 0, nil)
+	clf := ebl.NewEBooster(ebl.EBoosterParams{
+		Matrix:         ematrix_train,
+		NStages:        2000,
+		RegLambda:      1e-4,
+		MaxDepth:       6,
+		LearningRate:   0.3,
+		LossKind:       ebl.MseLoss{},
+		PrintMessages:  []ebl.EMatrix{ematrix_train, ematrix_test},
+		ThreadsNum:     40,
+		UnbalancedLoss: 0,
+	})
 
 	graphViz, graph := clf.Trees[0].DrawGraph()
 	ebl.HandleError(graphViz.RenderFilename(graph, graphviz.SVG, "tree_00.svg"))
@@ -62,11 +80,8 @@ type TrainConfig struct {
 }
 
 func train(srcConfig string) {
-	jsonFile, err := ioutil.ReadFile(srcConfig)
-	ebl.HandleError(err)
-
 	var trainConfig TrainConfig
-	ebl.HandleError(json.Unmarshal(jsonFile, &trainConfig))
+	decodeConfig(srcConfig, &trainConfig)
 
 	ematrixTrain := ebl.ReadEMatrix(
 		trainConfig.FileNameTrainInter,
@@ -85,9 +100,17 @@ func train(srcConfig string) {
 		ematrixTests = append(ematrixTests, ematrix)
 	}
 
-	clf := ebl.NewEBooster(ematrixTrain, trainConfig.NStages,
-		trainConfig.RegLambda, trainConfig.MaxDepth, trainConfig.LearningRate,
-		ebl.MseLoss{}, ematrixTests, trainConfig.ThreadsNum, trainConfig.UnbalancedLoss, nil)
+	clf := ebl.NewEBooster(ebl.EBoosterParams{
+		Matrix:         ematrixTrain,
+		NStages:        trainConfig.NStages,
+		RegLambda:      trainConfig.RegLambda,
+		MaxDepth:       trainConfig.MaxDepth,
+		LearningRate:   trainConfig.LearningRate,
+		LossKind:       ebl.MseLoss{},
+		PrintMessages:  ematrixTests,
+		ThreadsNum:     trainConfig.ThreadsNum,
+		UnbalancedLoss: trainConfig.UnbalancedLoss,
+	})
 
 	clf.Save(trainConfig.FileNameModel)
 }
@@ -101,11 +124,8 @@ type PredictConfig struct {
 }
 
 func predict(srcConfig string) {
-	jsonFile, err := ioutil.ReadFile(srcConfig)
-	ebl.HandleError(err)
-
 	var predictConfig PredictConfig
-	ebl.HandleError(json.Unmarshal(jsonFile, &predictConfig))
+	decodeConfig(srcConfig, &predictConfig)
 
 	FeaturesInter := ebl.ReadNpy(predictConfig.DataInterFileName)
 	FeaturesExtra := ebl.ReadNpy(predictConfig.DataExtraFileName)
@@ -138,11 +158,8 @@ type LcurveConfig struct {
 }
 
 func lcurve(srcConfig string) {
-	jsonFile, err := ioutil.ReadFile(srcConfig)
-	ebl.HandleError(err)
-
 	var lcurveConfig LcurveConfig
-	ebl.HandleError(json.Unmarshal(jsonFile, &lcurveConfig))
+	decodeConfig(srcConfig, &lcurveConfig)
 
 	FeaturesInter := ebl.ReadNpy(lcurveConfig.DataInterFileName)
 	FeaturesExtra := ebl.ReadNpy(lcurveConfig.DataExtraFileName)
@@ -191,11 +208,8 @@ type GraphConfig struct {
 }
 
 func graph(srcConfig string) {
-	jsonFile, err := ioutil.ReadFile(srcConfig)
-	ebl.HandleError(err)
-
 	var graphConfig GraphConfig
-	ebl.HandleError(json.Unmarshal(jsonFile, &graphConfig))
+	decodeConfig(srcConfig, &graphConfig)
 
 	clf := ebl.LoadModel(graphConfig.ModelFileName)
 	clf.RenderTrees(graphConfig.DumpPrefix, graphConfig.FigureType, graphConfig.PicturesDirectory)
@@ -207,11 +221,8 @@ type ModelLearningCurvesConfig struct {
 }
 
 func getLearningCurves(srcConfig string) {
-	jsonFile, err := ioutil.ReadFile(srcConfig)
-	ebl.HandleError(err)
-
 	var modelLearningCurves ModelLearningCurvesConfig
-	ebl.HandleError(json.Unmarshal(jsonFile, &modelLearningCurves))
+	decodeConfig(srcConfig, &modelLearningCurves)
 
 	clf := ebl.LoadModel(modelLearningCurves.PathToModel)
 	clf.DumpLearningCurves(modelLearningCurves.FilenameLearningCurves)

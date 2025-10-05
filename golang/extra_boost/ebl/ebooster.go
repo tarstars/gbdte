@@ -1,4 +1,4 @@
-package extra_boost_lib
+package ebl
 
 import (
 	"encoding/json"
@@ -51,17 +51,32 @@ type EBooster struct {
 	LearningCurveTitles []string
 }
 
+//EBoosterParams collect arguments required to construct a booster.
+type EBoosterParams struct {
+	Matrix         EMatrix
+	NStages        int
+	RegLambda      float64
+	MaxDepth       int
+	LearningRate   float64
+	LossKind       SplitLoss
+	PrintMessages  []EMatrix
+	ThreadsNum     int
+	UnbalancedLoss float64
+	Bias           *mat.Dense
+}
+
 //NewEBooster creates a new model.
-func NewEBooster(ematrix EMatrix, nStages int, regLambda float64, maxDepth int, learningRate float64, lossKind SplitLoss, printMessages []EMatrix, threadsNum int, unbalancedLoss float64, bias *mat.Dense) (ebooster *EBooster) {
+func NewEBooster(params EBoosterParams) (ebooster *EBooster) {
 	ebooster = &EBooster{make([]OneTree, 0), make([]string, 0)}
-	h, _ := ematrix.FeaturesInter.Dims()
+	h, _ := params.Matrix.FeaturesInter.Dims()
+	bias := params.Bias
 	if bias == nil {
 		bias = mat.NewDense(h, 1, nil)
 	}
 
 	var testBiases []*mat.Dense
 
-	for _, currentMessage := range printMessages {
+	for _, currentMessage := range params.PrintMessages {
 		description := ""
 		if currentMessage.Description != nil {
 			description = *currentMessage.Description
@@ -70,14 +85,14 @@ func NewEBooster(ematrix EMatrix, nStages int, regLambda float64, maxDepth int, 
 		testBiases = append(testBiases, nil)
 	}
 
-	for stage := 0; stage < nStages; stage++ {
+	for stage := 0; stage < params.NStages; stage++ {
 		log.Printf("Tree number %d\n", stage+1)
-		tree := NewTree(ematrix, bias, regLambda, maxDepth, learningRate, lossKind, threadsNum, unbalancedLoss)
-		deltaB := tree.PredictValue(ematrix.FeaturesInter, ematrix.FeaturesExtra)
+		tree := NewTree(params.Matrix, bias, params.RegLambda, params.MaxDepth, params.LearningRate, params.LossKind, params.ThreadsNum, params.UnbalancedLoss)
+		deltaB := tree.PredictValue(params.Matrix.FeaturesInter, params.Matrix.FeaturesExtra)
 		bias.Add(bias, deltaB)
 		currentTreeIndex := len(ebooster.Trees)
 		ebooster.Trees = append(ebooster.Trees, tree)
-		for testIndex, currentEmatrix := range printMessages {
+		for testIndex, currentEmatrix := range params.PrintMessages {
 			learningCurveValue := currentEmatrix.Message(tree, testIndex, testBiases)
 			ebooster.Trees[currentTreeIndex].LearningCurveRow = append(ebooster.Trees[currentTreeIndex].LearningCurveRow, learningCurveValue)
 		}

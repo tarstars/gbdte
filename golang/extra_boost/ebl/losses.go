@@ -1,4 +1,4 @@
-package extra_boost_lib
+package ebl
 
 //SplitLoss interface is the interface for a loss function. It provides the first and the second derivatives.
 type SplitLoss interface {

@@ -1,4 +1,4 @@
-package extra_boost_lib
+package ebl
 
 import (
 	"fmt"

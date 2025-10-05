@@ -1,4 +1,4 @@
-package extra_boost_lib
+package ebl
 
 import (
 	"fmt"
@@ -56,9 +56,24 @@ func TestRunAlgo(t *testing.T) {
 		4.1, 4.9, 5.5, 6.0, 6.5, 7.0, 4.1, 4.9, 5.5, 6.0, 6.5, 7.0,
 	})
 
-	ematrix := EMatrix{FeaturesInter, FeaturesExtra, Target, RecordIds}
-	clf := NewEBooster(ematrix, 10, 1e-6, 2, 0.2, MseLoss{},
-		[]EMatrix{}, 1, 0, bias)
+	ematrix := EMatrix{
+		FeaturesInter: FeaturesInter,
+		FeaturesExtra: FeaturesExtra,
+		Target:        Target,
+		RecordIds:     RecordIds,
+	}
+	clf := NewEBooster(EBoosterParams{
+		Matrix:         ematrix,
+		NStages:        10,
+		RegLambda:      1e-6,
+		MaxDepth:       2,
+		LearningRate:   0.2,
+		LossKind:       MseLoss{},
+		PrintMessages:  []EMatrix{},
+		ThreadsNum:     1,
+		UnbalancedLoss: 0,
+		Bias:           bias,
+	})
 
 	_ = clf
 
@@ -263,9 +278,24 @@ func TestSplitWhereInterpolatingFeatureDiffers_00(t *testing.T) {
 		4.1, 4.9, 5.5, 6.0, 6.5, 7.0, 4.1, 4.9, 5.5, 6.0, 6.5, 7.0, 4.1, 4.9, 5.5, 6.0, 6.5, 7.0,
 	})
 
-	ematrix := EMatrix{FeaturesInter, FeaturesExtra, Target, RecordIds}
-	clf := NewEBooster(ematrix, 10, 1e-6, 2, 0.2, MseLoss{},
-		[]EMatrix{}, 1, 0, bias)
+	ematrix := EMatrix{
+		FeaturesInter: FeaturesInter,
+		FeaturesExtra: FeaturesExtra,
+		Target:        Target,
+		RecordIds:     RecordIds,
+	}
+	clf := NewEBooster(EBoosterParams{
+		Matrix:         ematrix,
+		NStages:        10,
+		RegLambda:      1e-6,
+		MaxDepth:       2,
+		LearningRate:   0.2,
+		LossKind:       MseLoss{},
+		PrintMessages:  []EMatrix{},
+		ThreadsNum:     1,
+		UnbalancedLoss: 0,
+		Bias:           bias,
+	})
 
 	_ = clf
 	//wd, err := os.Getwd()
@@ -283,7 +313,12 @@ func TestSplitWhereInterpolatingFeatureDiffers_01(t *testing.T) {
 		0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	})
 
-	ematrix := EMatrix{FeaturesInter, FeaturesExtra, Target, RecordIds}
+	ematrix := EMatrix{
+		FeaturesInter: FeaturesInter,
+		FeaturesExtra: FeaturesExtra,
+		Target:        Target,
+		RecordIds:     RecordIds,
+	}
 	h, _, d := ematrix.validatedDimensions()
 	rawHessian := ematrix.allocateArrays()
 
@@ -305,7 +340,12 @@ func TestSplitWhereInterpolatingFeatureDiffers_02(t *testing.T) {
 		0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	})
 
-	ematrix := EMatrix{FeaturesInter, FeaturesExtra, Target, RecordIds}
+	ematrix := EMatrix{
+		FeaturesInter: FeaturesInter,
+		FeaturesExtra: FeaturesExtra,
+		Target:        Target,
+		RecordIds:     RecordIds,
+	}
 	h, _, d := ematrix.validatedDimensions()
 	rawHessian := ematrix.allocateArrays()
 
