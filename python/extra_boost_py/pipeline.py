@@ -151,11 +151,17 @@ def run_classical_pipeline(config: ExperimentConfig | None = None) -> PipelineRe
         threads_num=threads,
     )
 
+    monitor_datasets = [
+        (train_ds.features_inter, train_ds.features_extra, train_ds.target, "train"),
+        (test_ds.features_inter, test_ds.features_extra, test_ds.target, "test"),
+    ]
+
     booster = ExtraBooster.train(
         train_ds.features_inter,
         train_ds.features_extra,
         train_ds.target,
         params=params,
+        monitor_datasets=monitor_datasets,
     )
 
     predictions_test = booster.predict(test_ds.features_inter, test_ds.features_extra)

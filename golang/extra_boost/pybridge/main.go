@@ -23,6 +23,9 @@ var (
 	nextHandle uint64 = 1
 	boosters          = make(map[uint64]*ebl.EBooster)
 
+	monitorMu       sync.Mutex
+	pendingMonitors []ebl.EMatrix
+
 	lastErrorMu sync.Mutex
 	lastError   string
 
@@ -135,6 +138,59 @@ func makeRecordIDs(rows int) []int {
 	return ids
 }
 
+//export RegisterLearningCurveDataset
+func RegisterLearningCurveDataset(
+	featuresInterPtr *C.double,
+	rows C.int,
+	interCols C.int,
+	featuresExtraPtr *C.double,
+	extraCols C.int,
+	targetPtr *C.double,
+	desc *C.char,
+) C.int {
+	setLastError(nil)
+
+	if rows <= 0 {
+		setLastError(errors.New("monitor rows must be positive"))
+		return 1
+	}
+
+	inter, err := buildDense(featuresInterPtr, rows, interCols)
+	if err != nil {
+		setLastError(err)
+		return 2
+	}
+
+	extra, err := buildDense(featuresExtraPtr, rows, extraCols)
+	if err != nil {
+		setLastError(err)
+		return 3
+	}
+
+	target, err := buildDense(targetPtr, rows, 1)
+	if err != nil {
+		setLastError(err)
+		return 4
+	}
+
+	matrix := ebl.EMatrix{
+		FeaturesInter: inter,
+		FeaturesExtra: extra,
+		Target:        target,
+		RecordIds:     makeRecordIDs(int(rows)),
+	}
+
+	if desc != nil {
+		description := C.GoString(desc)
+		matrix.SetDescription(description)
+	}
+
+	monitorMu.Lock()
+	defer monitorMu.Unlock()
+	pendingMonitors = append(pendingMonitors, matrix)
+	return 0
+}
+
 //export TrainModel
 func TrainModel(
 	featuresInterPtr *C.double,
@@ -202,6 +258,13 @@ func TrainModel(
 		UnbalancedLoss: float64(unbalancedLoss),
 		Bias:           nil,
 	}
+
+	monitorMu.Lock()
+	if len(pendingMonitors) > 0 {
+		params.PrintMessages = append([]ebl.EMatrix(nil), pendingMonitors...)
+		pendingMonitors = nil
+	}
+	monitorMu.Unlock()
 
 	booster := ebl.NewEBooster(params)
 	handle := storeBooster(booster)

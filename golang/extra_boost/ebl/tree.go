@@ -19,6 +19,7 @@ type TreeNode struct {
 	LeafIndex             int // -1 if it is a non-leaf tree node
 	NumberOfObjects       int
 	CurrentLoss           float64
+	NoSplit               bool
 }
 
 //GraphDescription returns the description of a tree node for tree rendering as a graph
@@ -27,12 +28,16 @@ func (node TreeNode) GraphDescription() string {
 	sb.WriteString(fmt.Sprintln("#", node.NumberOfObjects))
 	sb.WriteString(fmt.Sprintln("id: ", node.TreeNodeId))
 	sb.WriteString(fmt.Sprintln("loss: ", node.CurrentLoss))
-	sb.WriteString(fmt.Sprintf("f_%d < %6.5f", node.FeatureNumber, node.Threshold))
+	if node.NoSplit {
+		sb.WriteString("NoSplit")
+	} else {
+		sb.WriteString(fmt.Sprintf("f_%d < %6.5f", node.FeatureNumber, node.Threshold))
+	}
 	return sb.String()
 }
 
 func NewTreeNode() TreeNode {
-	return TreeNode{0, 0, 0, -1, -1, -1, 0, 0}
+	return TreeNode{0, 0, 0, -1, -1, -1, 0, 0, false}
 }
 
 //NewTreeNodeFromSplitInfo creates a new tree node and extract a features index and a split threshold
@@ -124,10 +129,12 @@ func (oneTree *OneTree) BuildTree(
 	threadsNum int,
 	unbalancedLoss float64,
 ) int {
-	if leafInfo == nil || (currentDepth < maxDepth && Height(ematrix.FeaturesInter) > 5) { // TODO: More flexible approach to stop condition
-		treeNodeId := len(oneTree.TreeNodes)
-		bestSplit := TheBestSplit(ematrix, bias, parLambda, lossKind, threadsNum, unbalancedLoss)
-		if bestSplit != nil {
+	shouldSplit := leafInfo == nil || (currentDepth < maxDepth && Height(ematrix.FeaturesInter) > 5)
+	var bestSplit *BestSplit
+	if shouldSplit {
+		bestSplit = TheBestSplit(ematrix, bias, parLambda, lossKind, threadsNum, unbalancedLoss)
+		if bestSplit != nil && bestSplit.validSplit {
+			treeNodeId := len(oneTree.TreeNodes)
 			currentTreeNode := NewTreeNodeFromSplitInfo(*bestSplit, treeNodeId)
 			oneTree.TreeNodes = append(oneTree.TreeNodes, currentTreeNode)
 
@@ -145,15 +152,51 @@ func (oneTree *OneTree) BuildTree(
 		}
 	}
 
+	markNoSplit := shouldSplit && (bestSplit == nil || !bestSplit.validSplit)
+	return oneTree.makeLeafNode(ematrix, leafInfo, learningRate, bestSplit, markNoSplit, parLambda, lossKind)
+}
+
+func (oneTree *OneTree) makeLeafNode(
+	ematrix EMatrix,
+	leafInfo *LeafNode,
+	learningRate float64,
+	bestSplit *BestSplit,
+	markNoSplit bool,
+	parLambda float64,
+	lossKind SplitLoss,
+) int {
 	treeNodeId := len(oneTree.TreeNodes)
 	currentTreeNode := NewTreeNode()
 	currentTreeNode.TreeNodeId = treeNodeId
+	currentTreeNode.NumberOfObjects = Height(ematrix.FeaturesInter)
+	if bestSplit != nil {
+		currentTreeNode.CurrentLoss = bestSplit.currentValue
+	}
+	if markNoSplit {
+		currentTreeNode.NoSplit = true
+		currentTreeNode.FeatureNumber = -1
+	}
 	oneTree.TreeNodes = append(oneTree.TreeNodes, currentTreeNode)
 
+	var leaf *LeafNode
+	if leafInfo != nil {
+		leaf = leafInfo
+	} else {
+		var delta *mat.Dense
+		if bestSplit != nil && bestSplit.deltaCurrent != nil {
+			delta = mat.DenseCopyOf(bestSplit.deltaCurrent)
+		} else {
+			delta = solveNoSplitDelta(ematrix, parLambda, lossKind, oneTree.D)
+		}
+		leaf = NewLeafNode(delta, Height(ematrix.FeaturesInter), learningRate, ematrix.RecordIds)
+	}
+	if leaf.RecordIds == nil && len(ematrix.RecordIds) > 0 {
+		leaf.RecordIds = append([]int(nil), ematrix.RecordIds...)
+	}
 	leafNodeId := len(oneTree.LeafNodes)
 	oneTree.TreeNodes[treeNodeId].LeafIndex = leafNodeId
-	leafInfo.LeafNodeId = leafNodeId
-	oneTree.LeafNodes = append(oneTree.LeafNodes, *leafInfo)
+	leaf.LeafNodeId = leafNodeId
+	oneTree.LeafNodes = append(oneTree.LeafNodes, *leaf)
 	return treeNodeId
 }
 
@@ -235,4 +278,31 @@ func (tree OneTree) DrawGraph() (*graphviz.Graphviz, *cgraph.Graph) {
 	recurrentDraw(graph, tree, 0, nil)
 
 	return graphViz, graph
+}
+
+func solveNoSplitDelta(ematrix EMatrix, parLambda float64, lossKind SplitLoss, depth int) *mat.Dense {
+	delta := mat.NewDense(depth, 1, nil)
+	h, d := ematrix.FeaturesExtra.Dims()
+	if h == 0 || d == 0 {
+		return delta
+	}
+
+	if _, ok := lossKind.(MseLoss); !ok {
+		return delta
+	}
+
+	var normal mat.Dense
+	normal.Mul(ematrix.FeaturesExtra.T(), ematrix.FeaturesExtra)
+	for i := 0; i < d; i++ {
+		normal.Set(i, i, normal.At(i, i)+parLambda)
+	}
+
+	var rhs mat.Dense
+	rhs.Mul(ematrix.FeaturesExtra.T(), ematrix.Target)
+
+	var solve mat.Dense
+	solve.CloneFrom(&rhs)
+	solve.Solve(&normal, &rhs)
+	delta.Copy(&solve)
+	return delta
 }

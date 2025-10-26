@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Sequence, Tuple
 
 import numpy as np
 
@@ -88,6 +88,7 @@ class ExtraBooster:
         target: np.ndarray,
         params: BoosterParams | None = None,
         bridge: Optional[ExtraBoostBridge] = None,
+        monitor_datasets: Optional[Sequence[Tuple[np.ndarray, np.ndarray, np.ndarray, str]]] = None,
     ) -> "ExtraBooster":
         bridge = bridge or ExtraBoostBridge()
         params = params or BoosterParams()
@@ -99,6 +100,22 @@ class ExtraBooster:
         f_target = cls._ensure_f64(target, 1)
         if f_target.shape[0] != f_inter.shape[0]:
             raise ValueError("Target length must match number of rows.")
+
+        if monitor_datasets:
+            for dataset in monitor_datasets:
+                if len(dataset) == 4:
+                    feat_inter_m, feat_extra_m, target_m, desc = dataset
+                else:
+                    feat_inter_m, feat_extra_m, target_m = dataset[:3]
+                    desc = ""
+                m_inter = cls._ensure_f64(feat_inter_m, 2)
+                m_extra = cls._ensure_f64(feat_extra_m, 2)
+                if m_inter.shape[0] != m_extra.shape[0]:
+                    raise ValueError("Monitor features must share row count.")
+                m_target = cls._ensure_f64(target_m, 1)
+                if m_target.shape[0] != m_inter.shape[0]:
+                    raise ValueError("Monitor target length mismatch.")
+                bridge.register_learning_curve_dataset(m_inter, m_extra, m_target, desc)
 
         handle = bridge.train(f_inter, f_extra, f_target, params.to_bridge_dict())
         return cls(handle, f_inter.shape[1], f_extra.shape[1], bridge=bridge)

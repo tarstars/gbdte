@@ -52,7 +52,17 @@ def main() -> None:
 
     params = BoosterParams(n_stages=200, learning_rate=0.2, max_depth=6, loss="mse", threads_num=4)
     print("Training booster …")
-    booster = ExtraBooster.train(train_ds.features_inter, train_ds.features_extra, train_ds.target, params=params)
+    monitor_datasets = [
+        (train_ds.features_inter, train_ds.features_extra, train_ds.target, "train"),
+        (test_ds.features_inter, test_ds.features_extra, test_ds.target, "test"),
+    ]
+    booster = ExtraBooster.train(
+        train_ds.features_inter,
+        train_ds.features_extra,
+        train_ds.target,
+        params=params,
+        monitor_datasets=monitor_datasets,
+    )
 
     print("Scoring on the hold-out segment …")
     predictions = booster.predict(test_ds.features_inter, test_ds.features_extra)

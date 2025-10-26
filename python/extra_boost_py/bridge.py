@@ -53,6 +53,17 @@ class ExtraBoostBridge:
             ctypes.c_double,
         ]
 
+        self._lib.RegisterLearningCurveDataset.restype = ctypes.c_int
+        self._lib.RegisterLearningCurveDataset.argtypes = [
+            c_double_p,
+            ctypes.c_int,
+            ctypes.c_int,
+            c_double_p,
+            ctypes.c_int,
+            c_double_p,
+            ctypes.c_char_p,
+        ]
+
         self._lib.Predict.restype = ctypes.c_int
         self._lib.Predict.argtypes = [
             ctypes.c_ulonglong,
@@ -135,6 +146,27 @@ class ExtraBoostBridge:
             ctypes.c_double(params.get("unbalanced_loss", 0.0)),
         )
         return self._raise_on_zero(handle, "training")
+
+    def register_learning_curve_dataset(
+        self,
+        features_inter: np.ndarray,
+        features_extra: np.ndarray,
+        target: np.ndarray,
+        description: str = "",
+    ) -> None:
+        rows, inter_cols = features_inter.shape
+        _, extra_cols = features_extra.shape
+        desc_bytes = description.encode("utf-8") if description else None
+        status = self._lib.RegisterLearningCurveDataset(
+            features_inter.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+            ctypes.c_int(rows),
+            ctypes.c_int(inter_cols),
+            features_extra.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+            ctypes.c_int(extra_cols),
+            target.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+            ctypes.c_char_p(desc_bytes),
+        )
+        self._check_status(status, "register learning curve dataset")
 
     def predict(
         self,
