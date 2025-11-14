@@ -339,6 +339,30 @@ func SaveModel(handle C.ulonglong, path *C.char) C.int {
 	return 0
 }
 
+//export RenderTrees
+func RenderTrees(handle C.ulonglong, prefix, figureType, directory *C.char) C.int {
+	setLastError(nil)
+	booster, err := fetchBooster(uint64(handle))
+	if err != nil {
+		setLastError(err)
+		return 1
+	}
+	goPrefix := C.GoString(prefix)
+	goFigureType := C.GoString(figureType)
+	goDir := C.GoString(directory)
+	if goPrefix == "" {
+		goPrefix = "tree"
+	}
+	if goFigureType == "" {
+		goFigureType = "svg"
+	}
+	if goDir == "" {
+		goDir = "."
+	}
+	booster.RenderTrees(goPrefix, goFigureType, goDir)
+	return 0
+}
+
 //export LoadModel
 func LoadModel(path *C.char) C.ulonglong {
 	setLastError(nil)

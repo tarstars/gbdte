@@ -79,6 +79,14 @@ class ExtraBoostBridge:
         self._lib.SaveModel.restype = ctypes.c_int
         self._lib.SaveModel.argtypes = [ctypes.c_ulonglong, ctypes.c_char_p]
 
+        self._lib.RenderTrees.restype = ctypes.c_int
+        self._lib.RenderTrees.argtypes = [
+            ctypes.c_ulonglong,
+            ctypes.c_char_p,
+            ctypes.c_char_p,
+            ctypes.c_char_p,
+        ]
+
         self._lib.LoadModel.restype = ctypes.c_ulonglong
         self._lib.LoadModel.argtypes = [ctypes.c_char_p]
 
@@ -146,6 +154,16 @@ class ExtraBoostBridge:
             ctypes.c_double(params.get("unbalanced_loss", 0.0)),
         )
         return self._raise_on_zero(handle, "training")
+
+
+    def render_trees(self, handle: int, prefix: str, figure_type: str, directory: str) -> None:
+        status = self._lib.RenderTrees(
+            ctypes.c_ulonglong(handle),
+            prefix.encode("utf-8"),
+            figure_type.encode("utf-8"),
+            directory.encode("utf-8"),
+        )
+        self._check_status(status, "render trees")
 
     def register_learning_curve_dataset(
         self,

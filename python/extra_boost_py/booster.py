@@ -146,6 +146,13 @@ class ExtraBooster:
 
         return self._bridge.predict(self._handle, f_inter, f_extra, tree_limit)
 
+    def render_trees(self, prefix: str = "tree", figure_type: str = "svg", directory: str = ".") -> None:
+        if self._closed:
+            raise RuntimeError("Booster handle already freed.")
+        dir_path = Path(directory)
+        dir_path.mkdir(parents=True, exist_ok=True)
+        self._bridge.render_trees(self._handle, prefix, figure_type, str(dir_path))
+
     def save(self, path: str | Path) -> None:
         if self._closed:
             raise RuntimeError("Booster handle already freed.")
