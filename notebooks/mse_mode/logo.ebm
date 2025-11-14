@@ -1,0 +1,404 @@
+{
+  "Trees": [
+    {
+      "D": 4,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 2,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 8,
+          "LeafIndex": -1,
+          "NumberOfObjects": 124,
+          "CurrentLoss": -1.9988018726435217,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0.5,
+          "LeftIndex": 2,
+          "RightIndex": 5,
+          "LeafIndex": -1,
+          "NumberOfObjects": 72,
+          "CurrentLoss": -0.7875601925146518,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 1,
+          "Threshold": 0.5,
+          "LeftIndex": 3,
+          "RightIndex": 4,
+          "LeafIndex": -1,
+          "NumberOfObjects": 52,
+          "CurrentLoss": -0.6427689592895923,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 3,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 33,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 4,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 19,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 5,
+          "FeatureNumber": 1,
+          "Threshold": 0.5,
+          "LeftIndex": 6,
+          "RightIndex": 7,
+          "LeafIndex": -1,
+          "NumberOfObjects": 20,
+          "CurrentLoss": -0.24943826168050148,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 6,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 2,
+          "NumberOfObjects": 14,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 7,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 3,
+          "NumberOfObjects": 6,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 8,
+          "FeatureNumber": 0,
+          "Threshold": 0.5,
+          "LeftIndex": 9,
+          "RightIndex": 12,
+          "LeafIndex": -1,
+          "NumberOfObjects": 52,
+          "CurrentLoss": -1.3235797179074205,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 9,
+          "FeatureNumber": 1,
+          "Threshold": 0.5,
+          "LeftIndex": 10,
+          "RightIndex": 11,
+          "LeafIndex": -1,
+          "NumberOfObjects": 34,
+          "CurrentLoss": -1.1858111628258101,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 10,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 4,
+          "NumberOfObjects": 19,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 11,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 5,
+          "NumberOfObjects": 15,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 12,
+          "FeatureNumber": 1,
+          "Threshold": 0.5,
+          "LeftIndex": 13,
+          "RightIndex": 14,
+          "LeafIndex": -1,
+          "NumberOfObjects": 18,
+          "CurrentLoss": -0.22905083823872316,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 13,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 6,
+          "NumberOfObjects": 12,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 14,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 7,
+          "NumberOfObjects": 6,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            0.13139915553346398,
+            -0.009949546379771718,
+            -0.09264204814940442,
+            -0.011336705475079978
+          ],
+          "RecordIds": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32
+          ],
+          "NumberOfObjects": 33
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            -0.010105694759809635,
+            0.2646762062654847,
+            -0.0015933335493962268,
+            -0.005537628059447302
+          ],
+          "RecordIds": [
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70
+          ],
+          "NumberOfObjects": 19
+        },
+        {
+          "LeafNodeId": 2,
+          "Prediction": [
+            0.02598975711556409,
+            0.18006416356046706,
+            0.09280894787866233,
+            -0.023602462600949906
+          ],
+          "RecordIds": [
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99
+          ],
+          "NumberOfObjects": 14
+        },
+        {
+          "LeafNodeId": 3,
+          "Prediction": [
+            0.007296124801200732,
+            0.19130517665456903,
+            0.06641138989453263,
+            0.05146329207213382
+          ],
+          "RecordIds": [
+            112,
+            113,
+            114,
+            115,
+            116,
+            117
+          ],
+          "NumberOfObjects": 6
+        },
+        {
+          "LeafNodeId": 4,
+          "Prediction": [
+            0.1986415471112606,
+            0.08694095325647382,
+            0.00027013040896581905,
+            0.0015933838605231981
+          ],
+          "RecordIds": [
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51
+          ],
+          "NumberOfObjects": 19
+        },
+        {
+          "LeafNodeId": 5,
+          "Prediction": [
+            0.06117235587562986,
+            0.20717325547484222,
+            0.024817960119997144,
+            0.0214993258228217
+          ],
+          "RecordIds": [
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85
+          ],
+          "NumberOfObjects": 15
+        },
+        {
+          "LeafNodeId": 6,
+          "Prediction": [
+            0.21651525063378305,
+            -0.2063053111564621,
+            -0.12369839753305673,
+            -0.1769790484644304
+          ],
+          "RecordIds": [
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111
+          ],
+          "NumberOfObjects": 12
+        },
+        {
+          "LeafNodeId": 7,
+          "Prediction": [
+            0.07692064015396127,
+            0.0827629868675217,
+            -0.1268484105663592,
+            0.0382635526383881
+          ],
+          "RecordIds": [
+            118,
+            119,
+            120,
+            121,
+            122,
+            123
+          ],
+          "NumberOfObjects": 6
+        }
+      ],
+      "LearningCurveRow": [
+        0.000027593721028603263,
+        0.0006961334609667593
+      ]
+    }
+  ],
+  "LearningCurveTitles": [
+    "train",
+    "test"
+  ]
+}
