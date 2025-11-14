@@ -1,0 +1,41 @@
+# Core Python artefacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Virtual environments
+.env
+.venv
+env/
+env.bak/
+venv/
+
+# Jupyter
+.ipynb_checkpoints/
+*.nbconvert.ipynb
+
+# Go build cache
+.gocache/
+*.test
+coverage.out
+
+# IDE / editor metadata
+.idea/
+.vscode/
+*.swp
+
+# Generated shared objects and headers (Python ↔ Go bridge)
+python/extra_boost_py/libextra_boost.*
+python/extra_boost_py/__pycache__/
+
+# Experiment artefacts
+graphs/
+notebooks/**/graphs/
+
+# Misc scratch data
+python/mse_gen/raw_data/
