@@ -21,8 +21,9 @@ func (ematrix *EMatrix) SetDescription(description string) {
 	ematrix.Description = &description
 }
 
-//Message prints a message about the current state of the prediction on the current dataset
-func (ematrix EMatrix) Message(tree OneTree, testIndex int, testBiases []*mat.Dense) float64 {
+//Message prints a message about the current state of the prediction on the current dataset.
+//When useLogloss is true, learning curves are reported in logloss space; otherwise RMSE is used.
+func (ematrix EMatrix) Message(tree OneTree, testIndex int, testBiases []*mat.Dense, useLogloss bool) float64 {
 	currentPrediction := tree.PredictValue(ematrix.FeaturesInter, ematrix.FeaturesExtra)
 	if testBiases[testIndex] == nil {
 		testBiases[testIndex] = mat.DenseCopyOf(currentPrediction)
@@ -35,9 +36,15 @@ func (ematrix EMatrix) Message(tree OneTree, testIndex int, testBiases []*mat.De
 		description = *(ematrix.Description)
 	}
 
-	learningCurveValue := Rmse(ematrix.Target, testBiases[testIndex])
-
-	log.Print("RMSE for ", description, " = ", learningCurveValue)
+	var learningCurveValue float64
+	if useLogloss {
+		// testBiases accumulates raw logits F(x); applySigmoid converts to probabilities for logloss
+		learningCurveValue = Logloss(ematrix.Target, testBiases[testIndex], true)
+		log.Print("Logloss for ", description, " = ", learningCurveValue)
+	} else {
+		learningCurveValue = Rmse(ematrix.Target, testBiases[testIndex])
+		log.Print("RMSE for ", description, " = ", learningCurveValue)
+	}
 
 	return learningCurveValue
 }

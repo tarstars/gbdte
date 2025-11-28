@@ -85,6 +85,11 @@ func NewEBooster(params EBoosterParams) (ebooster *EBooster) {
 		testBiases = append(testBiases, nil)
 	}
 
+	useLogloss := false
+	if _, ok := params.LossKind.(LogLoss); ok {
+		useLogloss = true
+	}
+
 	for stage := 0; stage < params.NStages; stage++ {
 		log.Printf("Tree number %d\n", stage+1)
 		tree := NewTree(params.Matrix, bias, params.RegLambda, params.MaxDepth, params.LearningRate, params.LossKind, params.ThreadsNum, params.UnbalancedLoss)
@@ -93,7 +98,7 @@ func NewEBooster(params EBoosterParams) (ebooster *EBooster) {
 		currentTreeIndex := len(ebooster.Trees)
 		ebooster.Trees = append(ebooster.Trees, tree)
 		for testIndex, currentEmatrix := range params.PrintMessages {
-			learningCurveValue := currentEmatrix.Message(tree, testIndex, testBiases)
+			learningCurveValue := currentEmatrix.Message(tree, testIndex, testBiases, useLogloss)
 			ebooster.Trees[currentTreeIndex].LearningCurveRow = append(ebooster.Trees[currentTreeIndex].LearningCurveRow, learningCurveValue)
 		}
 	}
