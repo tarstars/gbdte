@@ -1,0 +1,7 @@
+cff-version: 1.2.0
+message: "If you use this software in academic work, please cite it."
+title: "GBDTE"
+authors:
+  - family-names: Trushin
+    given-names: Arseniy
+license: Apache-2.0

@@ -56,7 +56,7 @@ Prerequisites: Go ≥ 1.19 with CGO enabled, Python ≥ 3.10 with NumPy and matp
   preds = booster.predict(test.features_inter, test.features_extra)
   ```
 
-Keep the repository lean by regenerating artefacts only when needed and ensuring transient outputs (`libextra_boost.*`, `artifacts/`) stay untracked.***
+Keep the repository lean by regenerating artefacts only when needed and ensuring transient outputs (`libextra_boost.*`, `artifacts/`) stay untracked.
 
 ## License
 Licensed under the Apache License, Version 2.0. See the LICENSE file for details.
