@@ -1,16 +1,29 @@
-# Extra Bridged Boosting
+# GBDTE (Extra Bridged Boosting)
 
-Hybrid implementation of the ExtraBoost gradient boosting algorithm. The core learner is written in Go for speed, while a thin Python bridge exposes training and evaluation workflows, including uplift and ROC AUC analyses on synthetic, time-dependent datasets.
+Research-oriented implementation of ExtraBoost-style gradient boosting with a Go core and a Python bridge for experiments, metrics, and reports.
+
+## What is it?
+GBDTE is a research-grade implementation of ExtraBoost-style gradient boosting focused on extrapolating structured signals.
+It couples a Go core learner with a thin Python bridge for dataset generation, training, and evaluation.
+It ships end-to-end scripts and reports to reproduce the classical MSE/logloss experiments.
+
+## Why it matters?
+It targets settings where generalization beyond the training support matters, not just in-sample fit.
+The repo exposes both code and experiment outputs so results can be audited and extended.
+It is designed to stay lightweight for iterative research while remaining reproducible.
 
 ## Repository Layout
 - `golang/extra_boost/ebl`: gradient boosting engine (tree growing, split search, losses) with Go unit tests.
 - `golang/extra_boost/pybridge`: CGO entry point compiled into a shared library consumed from Python (`libextra_boost.*`).
 - `golang/extra_boost/extra_boost_main`: minimal CLI harness for ad-hoc experimentation.
+- `golang/poisson_legacy`: legacy Poisson booster and its CGO bridge for back-compat experiments.
 - `python/extra_boost_py`: Python package providing ctypes bindings (`bridge.py`), high-level booster API, classical dataset generator, metrics, and the orchestration pipeline.
 - `python/examples/full_pipeline.py`: end-to-end demo (generate dataset → train booster → evaluate → persist model).
 - `python/report/generate_test_binary_report.py`: reusable reporter that produces uplift/ROC plots and Markdown summaries.
 - `scripts/run_classical_experiments.py`: batch runner that regenerates the MSE and logloss experiment artefacts under `reports/classical_experiment/`.
+- `scripts/run_smoke_tests.py`: quick smoke tests for the standard and legacy bridges.
 - `reports/classical_experiment/`: latest experiment outputs (PDF charts, Markdown, JSON summaries).
+- `docs/tech_report/`: outline for the technical report and citation pointers.
 
 ## Getting Started
 Prerequisites: Go ≥ 1.19 with CGO enabled, Python ≥ 3.10 with NumPy and matplotlib available.
@@ -39,6 +52,14 @@ Prerequisites: Go ≥ 1.19 with CGO enabled, Python ≥ 3.10 with NumPy and matp
    ```
    Results are written to `reports/classical_experiment/{mse,logloss}/`.
 
+## Results and Reproducing Figure 1
+- Run the classical experiment script:
+  ```bash
+  PYTHONPATH=python python3 scripts/run_classical_experiments.py
+  ```
+- Outputs land in `reports/classical_experiment/` with PDF charts and summaries.
+- `artifacts/` and `libextra_*` files are transient build/run outputs and are intentionally untracked.
+
 ## Developing
 - Run Go unit tests:
   ```bash
@@ -56,7 +77,11 @@ Prerequisites: Go ≥ 1.19 with CGO enabled, Python ≥ 3.10 with NumPy and matp
   preds = booster.predict(test.features_inter, test.features_extra)
   ```
 
-Keep the repository lean by regenerating artefacts only when needed and ensuring transient outputs (`libextra_boost.*`, `artifacts/`) stay untracked.
+Keep the repository lean by regenerating artefacts only when needed and ensuring transient outputs (`libextra_*`, `artifacts/`) stay untracked.
+
+## About metadata (GitHub)
+Suggested description: “GBDTE: Go + Python ExtraBoost-style gradient boosting for extrapolation-focused research.”
+Suggested topics: `gbdt`, `gradient-boosting`, `decision-trees`, `extrapolation`, `python`, `go`, `machine-learning`, `research`.
 
 ## License
 Licensed under the Apache License, Version 2.0. See the LICENSE file for details.
