@@ -1,0 +1,1928 @@
+{
+  "Trees": [
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 11,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -1.1377828639610996,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 34884,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 5116,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            0.14939981986830383,
+            -0.25342038677335044
+          ],
+          "NumberOfObjects": 34884
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            -1.0186248640512467,
+            2.0689250153415193
+          ],
+          "NumberOfObjects": 5116
+        }
+      ],
+      "LearningCurveRow": [
+        0.6849487252539177,
+        0.6885194902757223
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 12,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -0.18895759612075047,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 34972,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 5028,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            0.1481087493328325,
+            -0.32220497192683395
+          ],
+          "NumberOfObjects": 34972
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            -1.097537315885002,
+            2.437242672989954
+          ],
+          "NumberOfObjects": 5028
+        }
+      ],
+      "LearningCurveRow": [
+        0.6769488848473199,
+        0.6846332862069985
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 13,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -0.1968690698740041,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 34997,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 5003,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            0.1427752104806695,
+            -0.2899853650266334
+          ],
+          "NumberOfObjects": 34997
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            -1.0515589524284277,
+            2.173581327971128
+          ],
+          "NumberOfObjects": 5003
+        }
+      ],
+      "LearningCurveRow": [
+        0.669242330563233,
+        0.6790741531735166
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 10,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -0.1452456356102128,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 35085,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 4915,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            0.12817910864188245,
+            -0.21227932941560668
+          ],
+          "NumberOfObjects": 35085
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            -1.0087878781858053,
+            1.8302165295605324
+          ],
+          "NumberOfObjects": 4915
+        }
+      ],
+      "LearningCurveRow": [
+        0.6617800857843554,
+        0.6746320819447926
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 14,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -0.08988118296795494,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 35007,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 4993,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            0.1416064635935507,
+            -0.28596603517540586
+          ],
+          "NumberOfObjects": 35007
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            -1.050818594733145,
+            2.1579112554274387
+          ],
+          "NumberOfObjects": 4993
+        }
+      ],
+      "LearningCurveRow": [
+        0.6544855244595444,
+        0.6699526620530244
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 4,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -0.10742245064619288,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 34982,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 5018,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            -0.1491730968132832,
+            0.28178179957098526
+          ],
+          "NumberOfObjects": 34982
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            0.9768949842732997,
+            -1.783599577428947
+          ],
+          "NumberOfObjects": 5018
+        }
+      ],
+      "LearningCurveRow": [
+        0.6472224256241147,
+        0.6658809449679374
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 1,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -0.2139449541517246,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 35015,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 4985,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            -0.13666240023929743,
+            0.2617305363447542
+          ],
+          "NumberOfObjects": 35015
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            1.003252410426231,
+            -1.9443109055115864
+          ],
+          "NumberOfObjects": 4985
+        }
+      ],
+      "LearningCurveRow": [
+        0.6402238925053606,
+        0.6615428152925559
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 3,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -0.23107655728216697,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 34932,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 5068,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            -0.12847485928080826,
+            0.2154798997866083
+          ],
+          "NumberOfObjects": 34932
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            0.970659432324015,
+            -1.7509198464840248
+          ],
+          "NumberOfObjects": 5068
+        }
+      ],
+      "LearningCurveRow": [
+        0.6334025608769723,
+        0.6573638834980663
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 9,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -0.17301107835444485,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 34960,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 5040,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            0.1303937129336475,
+            -0.1885512682350825
+          ],
+          "NumberOfObjects": 34960
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            -0.8829724877461043,
+            1.3161802304420522
+          ],
+          "NumberOfObjects": 5040
+        }
+      ],
+      "LearningCurveRow": [
+        0.6269310612475246,
+        0.655543460700073
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 8,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -0.07031643978797723,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 35065,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 4935,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            0.13946244962555923,
+            -0.29853570079314506
+          ],
+          "NumberOfObjects": 35065
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            -1.0390035868465588,
+            2.2376183344182303
+          ],
+          "NumberOfObjects": 4935
+        }
+      ],
+      "LearningCurveRow": [
+        0.6207346548937146,
+        0.6512212114354249
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 7,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -0.13517479022829273,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 34942,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 5058,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            -0.15830867738587628,
+            0.3573868134900485
+          ],
+          "NumberOfObjects": 34942
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            0.9939727612530542,
+            -2.131751286138514
+          ],
+          "NumberOfObjects": 5058
+        }
+      ],
+      "LearningCurveRow": [
+        0.6146656802125646,
+        0.6475811138508029
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 2,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -0.1879440457997374,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 35071,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 4929,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            -0.14026578888760724,
+            0.3062859737432815
+          ],
+          "NumberOfObjects": 35071
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            1.0526595840989839,
+            -2.3303273551154486
+          ],
+          "NumberOfObjects": 4929
+        }
+      ],
+      "LearningCurveRow": [
+        0.6086020604800746,
+        0.6439762811561233
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 15,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -0.18601367153075365,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 35070,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 4930,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            0.14487055312045694,
+            -0.2873653485797558
+          ],
+          "NumberOfObjects": 35070
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            -0.9504396697271988,
+            1.7850523575144832
+          ],
+          "NumberOfObjects": 4930
+        }
+      ],
+      "LearningCurveRow": [
+        0.6028383458810113,
+        0.6395152772999657
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 5,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -0.08546372402074504,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 35082,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 4918,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            -0.14826429779352024,
+            0.3171034133049495
+          ],
+          "NumberOfObjects": 35082
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            1.004757428844485,
+            -2.1147954598784313
+          ],
+          "NumberOfObjects": 4918
+        }
+      ],
+      "LearningCurveRow": [
+        0.5971559439301792,
+        0.6358363414574855
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 6,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -0.13991485784173407,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 34981,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 5019,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            -0.11933062108338655,
+            0.20433227934719755
+          ],
+          "NumberOfObjects": 34981
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            0.8991263090270363,
+            -1.6163737252057526
+          ],
+          "NumberOfObjects": 5019
+        }
+      ],
+      "LearningCurveRow": [
+        0.5919754670838457,
+        0.6324321463846153
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 0,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -0.10750322674400307,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 34990,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 5010,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            -0.12515536396870836,
+            0.2600807330378283
+          ],
+          "NumberOfObjects": 34990
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            0.9252325223371145,
+            -1.9616602671372112
+          ],
+          "NumberOfObjects": 5010
+        }
+      ],
+      "LearningCurveRow": [
+        0.587350228676606,
+        0.6279481493366647
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 1,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -0.1013990214623609,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 35015,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 4985,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            -0.004971431538873734,
+            0.010315942117756438
+          ],
+          "NumberOfObjects": 35015
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            0.10560089792143602,
+            -0.2904481362426054
+          ],
+          "NumberOfObjects": 4985
+        }
+      ],
+      "LearningCurveRow": [
+        0.5873152771735695,
+        0.6277874964764809
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 7,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -3.4063213686542015e-05,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 34942,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 5058,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            -0.010349999400882371,
+            0.03087062610117736
+          ],
+          "NumberOfObjects": 34942
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            0.08156046676133653,
+            -0.24350927890491522
+          ],
+          "NumberOfObjects": 5058
+        }
+      ],
+      "LearningCurveRow": [
+        0.5872937419436531,
+        0.6281442362986698
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 14,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -1.1557445559455855e-05,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 35007,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 4993,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            0.009916941828822485,
+            -0.03470088488944664
+          ],
+          "NumberOfObjects": 35007
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            -0.07932521504721231,
+            0.273037352937921
+          ],
+          "NumberOfObjects": 4993
+        }
+      ],
+      "LearningCurveRow": [
+        0.5872759649345661,
+        0.6284420493392388
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 6,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -7.485032534731818e-06,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 34981,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 5019,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            -0.009208204389093286,
+            0.02630189816948291
+          ],
+          "NumberOfObjects": 34981
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            0.07262959030539082,
+            -0.2076897281784447
+          ],
+          "NumberOfObjects": 5019
+        }
+      ],
+      "LearningCurveRow": [
+        0.5872585361645688,
+        0.6280816801223859
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 2,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -6.5073669640572795e-06,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 35071,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 4929,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            -0.008097339150629174,
+            0.02070703175715992
+          ],
+          "NumberOfObjects": 35071
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            0.06744806401465958,
+            -0.17758274862525442
+          ],
+          "NumberOfObjects": 4929
+        }
+      ],
+      "LearningCurveRow": [
+        0.5872425855778912,
+        0.6283910128055351
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 13,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -5.575649659825651e-06,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 34997,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 5003,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            0.00800523725282195,
+            -0.020157366572488324
+          ],
+          "NumberOfObjects": 34997
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            -0.06402817414527578,
+            0.16544166568823265
+          ],
+          "NumberOfObjects": 5003
+        }
+      ],
+      "LearningCurveRow": [
+        0.5872275123635557,
+        0.6284595387537606
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 5,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -4.875315165851409e-06,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 35082,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 4918,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            -0.008288384934097923,
+            0.023881617118117437
+          ],
+          "NumberOfObjects": 35082
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            0.06778664247029455,
+            -0.19693099030744085
+          ],
+          "NumberOfObjects": 4918
+        }
+      ],
+      "LearningCurveRow": [
+        0.5872131213642302,
+        0.628677141576903
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 10,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -4.929067411289436e-06,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 35085,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 4915,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            0.008319040273860321,
+            -0.02375950589613865
+          ],
+          "NumberOfObjects": 35085
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            -0.06876902460485763,
+            0.19885694700074502
+          ],
+          "NumberOfObjects": 4915
+        }
+      ],
+      "LearningCurveRow": [
+        0.5871983938242114,
+        0.6283877398276488
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 15,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -4.706237546345618e-06,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 35070,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 4930,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            0.008599001440084656,
+            -0.027517966748913707
+          ],
+          "NumberOfObjects": 35070
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            -0.06972271729136326,
+            0.22293529069999807
+          ],
+          "NumberOfObjects": 4930
+        }
+      ],
+      "LearningCurveRow": [
+        0.587184237091427,
+        0.6282158827205007
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 0,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -4.297361492959218e-06,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 34990,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 5010,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            -0.0082287887423029,
+            0.025211714351069756
+          ],
+          "NumberOfObjects": 34990
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            0.06488979396883604,
+            -0.19927428818310905
+          ],
+          "NumberOfObjects": 5010
+        }
+      ],
+      "LearningCurveRow": [
+        0.5871713550944628,
+        0.6282426662035521
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 11,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -3.955797772208316e-06,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 34884,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 5116,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            0.007674570608541813,
+            -0.019723093465238088
+          ],
+          "NumberOfObjects": 34884
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            -0.05928114326047338,
+            0.15494614462975786
+          ],
+          "NumberOfObjects": 5116
+        }
+      ],
+      "LearningCurveRow": [
+        0.5871583086904668,
+        0.6282620667560355
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 8,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -3.5838066383252607e-06,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 35065,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 4935,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            0.006615294710015392,
+            -0.018997737207808084
+          ],
+          "NumberOfObjects": 35065
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            -0.05524298275929203,
+            0.16097721376914292
+          ],
+          "NumberOfObjects": 4935
+        }
+      ],
+      "LearningCurveRow": [
+        0.5871489273370494,
+        0.6284604147172161
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 3,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -2.3136800469711243e-06,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 34932,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 5068,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            -0.005812172346019631,
+            0.013288523118907054
+          ],
+          "NumberOfObjects": 34932
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            0.047121012428819005,
+            -0.11260419236107005
+          ],
+          "NumberOfObjects": 5068
+        }
+      ],
+      "LearningCurveRow": [
+        0.5871401280083601,
+        0.6282936385458268
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 9,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -1.4462074545954116e-06,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 34960,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 5040,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            0.0037888608895580086,
+            -0.004102411395850804
+          ],
+          "NumberOfObjects": 34960
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            -0.03090405228119636,
+            0.04283603299001176
+          ],
+          "NumberOfObjects": 5040
+        }
+      ],
+      "LearningCurveRow": [
+        0.5871335182005513,
+        0.6283063741666168
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 12,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -3.9299603539972576e-07,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 34972,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 5028,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            0.005377791762641674,
+            -0.018402744926256327
+          ],
+          "NumberOfObjects": 34972
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            -0.04337560970549525,
+            0.14636162193619212
+          ],
+          "NumberOfObjects": 5028
+        }
+      ],
+      "LearningCurveRow": [
+        0.5871282646647702,
+        0.6286881567013691
+      ]
+    },
+    {
+      "D": 2,
+      "TreeNodes": [
+        {
+          "TreeNodeId": 0,
+          "FeatureNumber": 4,
+          "Threshold": 0.5,
+          "LeftIndex": 1,
+          "RightIndex": 2,
+          "LeafIndex": -1,
+          "NumberOfObjects": 40000,
+          "CurrentLoss": -6.872068715173512e-07,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 1,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 0,
+          "NumberOfObjects": 34982,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        },
+        {
+          "TreeNodeId": 2,
+          "FeatureNumber": 0,
+          "Threshold": 0,
+          "LeftIndex": -1,
+          "RightIndex": -1,
+          "LeafIndex": 1,
+          "NumberOfObjects": 5018,
+          "CurrentLoss": 0,
+          "NoSplit": false
+        }
+      ],
+      "LeafNodes": [
+        {
+          "LeafNodeId": 0,
+          "Prediction": [
+            -0.0031509146417611875,
+            0.009726148980514222
+          ],
+          "NumberOfObjects": 34982
+        },
+        {
+          "LeafNodeId": 1,
+          "Prediction": [
+            0.025593995427221704,
+            -0.0798874548043289
+          ],
+          "NumberOfObjects": 5018
+        }
+      ],
+      "LearningCurveRow": [
+        0.5871263582699209,
+        0.6285722032494763
+      ]
+    }
+  ],
+  "LearningCurveTitles": [
+    "train",
+    "test"
+  ]
+}
