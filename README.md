@@ -27,6 +27,12 @@ Prerequisites: Go ≥ 1.19 with CGO enabled, Python ≥ 3.10 with NumPy and matp
    ```
    The script rebuilds the shared library if absent, trains on the classical dataset, evaluates ROC AUC over time, and saves model artefacts to `artifacts/`.
 
+2b. **Smoke-test both standard and legacy Poisson bridges**:
+   ```bash
+   PYTHONPATH=python python3 scripts/run_smoke_tests.py
+   ```
+   This builds both shared libraries (`libextra_boost.*` and `libextra_poisson_legacy.*`) and runs the standard pipeline plus the Poisson legacy quickcheck.
+
 3. **Regenerate the classical experiment reports** (produces Markdown, PDF plots, JSON summaries):
    ```bash
    PYTHONPATH=python python3 scripts/run_classical_experiments.py
@@ -51,3 +57,6 @@ Prerequisites: Go ≥ 1.19 with CGO enabled, Python ≥ 3.10 with NumPy and matp
   ```
 
 Keep the repository lean by regenerating artefacts only when needed and ensuring transient outputs (`libextra_boost.*`, `artifacts/`) stay untracked.***
+
+## License
+Licensed under the Apache License, Version 2.0. See the LICENSE file for details.

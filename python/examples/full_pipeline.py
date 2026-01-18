@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Demonstrates the end-to-end workflow: dataset generation → Go booster → metrics."""
 
 from __future__ import annotations
