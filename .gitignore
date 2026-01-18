@@ -39,3 +39,28 @@ notebooks/**/graphs/
 
 # Misc scratch data
 python/mse_gen/raw_data/
+
+# build artifacts
+*.so
+*.dylib
+*.dll
+*.o
+*.a
+
+# python
+dist/
+build/
+.venv/
+
+# notebooks
+notebooks/**/uzip/
+notebooks/logloss_mode/**/*.svg
+
+# local outputs
+artifacts/
+
+# Generated shared objects and headers (Python ↔ Go bridge)
+python/extra_boost_py/libextra_*.so
+python/extra_boost_py/libextra_*.dylib
+python/extra_boost_py/libextra_*.dll
+python/extra_boost_py/libextra_*.h
