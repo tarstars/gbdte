@@ -12,6 +12,7 @@
 - `go build ./...`: compile every Go package (useful before publishing shared objects).
 - `go test ./...`: execute Go unit tests located in `golang/extra_boost/ebl`.
 - `PYTHONPATH=python python3 python/examples/full_pipeline.py`: smoke-test the bridge and pipeline using the demo workflow.
+- `PYTHONPATH=python python3 scripts/run_smoke_tests.py`: build both shared libraries and run the standard + Poisson legacy smoke tests.
 - `python3 -c "from extra_boost_py.go_lib import build_shared; build_shared()"`: build `libextra_boost.*` and its header via the helper.
 - `PYTHONPATH=python python3 scripts/run_classical_experiments.py`: rerun the classical benchmarking experiments.
 
