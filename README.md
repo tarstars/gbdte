@@ -1,22 +1,29 @@
-# GBDTE (Extra Bridged Boosting)
+# GBDTE — Extra Bridged Boosting (ExtraBoost)
 
-Research-oriented implementation of ExtraBoost-style gradient boosting with a Go core and a Python bridge for experiments, metrics, and reports.
+Gradient boosted decision trees with extrapolation via extra (bridged) features.
+
+## Naming
+GBDTE is the project and research direction.
+Extra Bridged Boosting (ExtraBoost) is the implementation/algorithm nickname used in code and reports.
 
 ## What is it?
-GBDTE is a research-grade implementation of ExtraBoost-style gradient boosting focused on extrapolating structured signals.
-It couples a Go core learner with a thin Python bridge for dataset generation, training, and evaluation.
-It ships end-to-end scripts and reports to reproduce the classical MSE/logloss experiments.
+GBDTE implements Extra Bridged Boosting (ExtraBoost) with a Go core learner and Python orchestration.
+It provides dataset generation, training, and evaluation pipelines for classical MSE/logloss experiments.
+The bridge is designed for fast iteration while keeping experiments reproducible.
 
 ## Why it matters?
-It targets settings where generalization beyond the training support matters, not just in-sample fit.
-The repo exposes both code and experiment outputs so results can be audited and extended.
-It is designed to stay lightweight for iterative research while remaining reproducible.
+It targets extrapolation and distribution-shift evaluation, not just in-sample fit.
+The repo ships scripts and reports so results can be audited and extended.
+It stays lightweight for research while keeping commands deterministic.
 
 ## Repository Layout
+- `datasets/`: classical datasets and static assets used in the MSE experiments.
+- `docs/`: tech report outline, release checklist, and presentation materials.
 - `golang/extra_boost/ebl`: gradient boosting engine (tree growing, split search, losses) with Go unit tests.
 - `golang/extra_boost/pybridge`: CGO entry point compiled into a shared library consumed from Python (`libextra_boost.*`).
 - `golang/extra_boost/extra_boost_main`: minimal CLI harness for ad-hoc experimentation.
 - `golang/poisson_legacy`: legacy Poisson booster and its CGO bridge for back-compat experiments.
+- `notebooks/`: experiment notebooks for MSE/logloss analyses (including archived variants).
 - `python/extra_boost_py`: Python package providing ctypes bindings (`bridge.py`), high-level booster API, classical dataset generator, metrics, and the orchestration pipeline.
 - `python/examples/full_pipeline.py`: end-to-end demo (generate dataset → train booster → evaluate → persist model).
 - `python/report/generate_test_binary_report.py`: reusable reporter that produces uplift/ROC plots and Markdown summaries.
@@ -79,9 +86,9 @@ Prerequisites: Go ≥ 1.19 with CGO enabled, Python ≥ 3.10 with NumPy and matp
 
 Keep the repository lean by regenerating artefacts only when needed and ensuring transient outputs (`libextra_*`, `artifacts/`) stay untracked.
 
-## About metadata (GitHub)
-Suggested description: “GBDTE: Go + Python ExtraBoost-style gradient boosting for extrapolation-focused research.”
-Suggested topics: `gbdt`, `gradient-boosting`, `decision-trees`, `extrapolation`, `python`, `go`, `machine-learning`, `research`.
+## GitHub About suggestion
+Suggested description: GBDTE: gradient boosted decision trees with extrapolation via extra (bridged) features.
+Suggested topics: gbdt, gradient-boosting, decision-trees, extrapolation, python, go, machine-learning, research
 
 ## License
 Licensed under the Apache License, Version 2.0. See the LICENSE file for details.
