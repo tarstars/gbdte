@@ -1,0 +1,79 @@
+{
+  "statistic": 106.86428571428576,
+  "p_value": 9.237248423096863e-21,
+  "avg_ranks": {
+    "catboost_pois": 2.4,
+    "gbdte_pois": 5.0,
+    "gbdte_pois_const": 5.45,
+    "gbdte_pois_wrong": 7.0,
+    "lgbm_pois": 2.9,
+    "oracle_pois": 1.0,
+    "xgb_pois": 4.25
+  },
+  "n_blocks": 20,
+  "nemenyi_p": {
+    "catboost_pois": {
+      "catboost_pois": 1.0,
+      "gbdte_pois": 0.002697029439119425,
+      "gbdte_pois_const": 0.00016260895070996373,
+      "gbdte_pois_wrong": 3.471893883499888e-10,
+      "lgbm_pois": 0.9906454989272447,
+      "oracle_pois": 0.38336483961867773,
+      "xgb_pois": 0.0961481484862945
+    },
+    "gbdte_pois": {
+      "catboost_pois": 0.002697029439119425,
+      "gbdte_pois": 1.0,
+      "gbdte_pois_const": 0.9947037356684341,
+      "gbdte_pois_wrong": 0.05304392756235887,
+      "lgbm_pois": 0.034459817336524035,
+      "oracle_pois": 9.966805070149576e-08,
+      "xgb_pois": 0.9289616378797597
+    },
+    "gbdte_pois_const": {
+      "catboost_pois": 0.00016260895070996373,
+      "gbdte_pois": 0.9947037356684341,
+      "gbdte_pois_const": 1.0,
+      "gbdte_pois_wrong": 0.25915828811541974,
+      "lgbm_pois": 0.003578556757673712,
+      "oracle_pois": 1.534367966016248e-09,
+      "xgb_pois": 0.5776101296980156
+    },
+    "gbdte_pois_wrong": {
+      "catboost_pois": 3.471893883499888e-10,
+      "gbdte_pois": 0.05304392756235887,
+      "gbdte_pois_const": 0.25915828811541974,
+      "gbdte_pois_wrong": 1.0,
+      "lgbm_pois": 4.090420324676103e-08,
+      "oracle_pois": 1.1102230246251565e-16,
+      "xgb_pois": 0.001114071845225162
+    },
+    "lgbm_pois": {
+      "catboost_pois": 0.9906454989272447,
+      "gbdte_pois": 0.034459817336524035,
+      "gbdte_pois_const": 0.003578556757673712,
+      "gbdte_pois_wrong": 4.090420324676103e-08,
+      "lgbm_pois": 1.0,
+      "oracle_pois": 0.07941828327145495,
+      "xgb_pois": 0.4298964371673669
+    },
+    "oracle_pois": {
+      "catboost_pois": 0.38336483961867773,
+      "gbdte_pois": 9.966805070149576e-08,
+      "gbdte_pois_const": 1.534367966016248e-09,
+      "gbdte_pois_wrong": 1.1102230246251565e-16,
+      "lgbm_pois": 0.07941828327145495,
+      "oracle_pois": 1.0,
+      "xgb_pois": 4.029389235948866e-05
+    },
+    "xgb_pois": {
+      "catboost_pois": 0.0961481484862945,
+      "gbdte_pois": 0.9289616378797597,
+      "gbdte_pois_const": 0.5776101296980156,
+      "gbdte_pois_wrong": 0.001114071845225162,
+      "lgbm_pois": 0.4298964371673669,
+      "oracle_pois": 4.029389235948866e-05,
+      "xgb_pois": 1.0
+    }
+  }
+}

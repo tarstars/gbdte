@@ -1,0 +1,27 @@
+{
+  "suite": "baselines_poisson",
+  "git": "94bdd2ce93d535a1dd4ebeb3f0d7937383bdf61e",
+  "presets": {
+    "poisson_k8": {
+      "k_groups": 8,
+      "rho": 1.0,
+      "drift": 1.0,
+      "n_objects": 500,
+      "n_bins": 20,
+      "exposure": 20,
+      "cut": 0.6,
+      "seed": 0
+    },
+    "poisson_k64": {
+      "k_groups": 64,
+      "rho": 1.0,
+      "drift": 1.0,
+      "n_objects": 2000,
+      "n_bins": 20,
+      "exposure": 20,
+      "cut": 0.6,
+      "seed": 0
+    }
+  },
+  "seeds": 10
+}
