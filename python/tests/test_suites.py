@@ -9,6 +9,12 @@ def test_quick_regime_map(tmp_path: Path):
     assert (out / "run_meta.json").exists()
 
 
+def test_quick_baselines_poisson(tmp_path: Path):
+    out = run_suite("baselines_poisson", tmp_path, seeds=2, quick=True)
+    assert (out / "results.csv").exists()
+    assert (out / "summary_poisson_dev.md").exists()
+
+
 def test_quick_rolestat(tmp_path: Path):
     out = run_suite("rolestat_validation", tmp_path, seeds=2, quick=True)
     assert (out / "separability_vs_rho.pdf").exists()

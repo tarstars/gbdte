@@ -16,6 +16,8 @@ import pandas as pd
 from .baselines import make_models
 from .benchgen import Bench, PRESETS, generate
 from .classical_bench import classical_bench
+from .poisson_baselines import make_poisson_models
+from .poisson_bench import POISSON_PRESETS, generate_poisson
 from .rolestat import separability_index
 from .stats import cd_diagram, friedman_nemenyi, run_grid, summary_table
 
@@ -155,9 +157,29 @@ def suite_auto_roles(out: Path, seeds: int, quick: bool) -> None:
                   {"rmse": False})
 
 
+def suite_baselines_poisson(out: Path, seeds: int, quick: bool) -> None:
+    presets = {k: POISSON_PRESETS[k]
+               for k in (["poisson_k8"] if quick else ["poisson_k8", "poisson_k64"])}
+    models = make_poisson_models()
+
+    def factory(name: str, seed: int):
+        cfg = replace(presets[name], seed=seed,
+                      n_objects=60 if quick else presets[name].n_objects,
+                      n_bins=8 if quick else presets[name].n_bins)
+        return generate_poisson(cfg)
+
+    res = run_grid(models, None, _seeds(seeds), bench_factory=factory,
+                   bench_names=list(presets), tune_trials=2 if quick else 8)
+    _write_report(out, res, {"suite": "baselines_poisson", "git": _git_sha(),
+                             "presets": {k: asdict(v) for k, v in presets.items()},
+                             "seeds": seeds},
+                  {"poisson_dev": False, "rate_rmse": False})
+
+
 SUITES = {
     "baselines_mse": suite_baselines_mse,
     "baselines_logloss": suite_baselines_logloss,
+    "baselines_poisson": suite_baselines_poisson,
     "regime_map": suite_regime_map,
     "rolestat_validation": suite_rolestat_validation,
     "auto_roles": suite_auto_roles,
