@@ -17,25 +17,33 @@ from .baselines import Model
 from .benchgen import Bench
 
 
-def evaluate(model: Model, bench: Bench) -> Dict[str, float]:
+def evaluate(model: Model, bench) -> Dict[str, float]:
     test = bench.test
     pred = model.predict(test)
     y = test["y"].to_numpy()
     if bench.task == "mse":
         return {"rmse": float(np.sqrt(np.mean((pred - y) ** 2)))}
+    if bench.task == "poisson":
+        mu = np.clip(pred, 1e-9, None)
+        dev = 2.0 * np.where(y > 0, y * np.log(np.clip(y, 1e-9, None) / mu) - (y - mu), mu)
+        out = {"poisson_dev": float(np.mean(dev))}
+        if "lam_true" in test.columns:
+            rate_pred = pred / bench.delta
+            out["rate_rmse"] = float(np.sqrt(np.mean(
+                (rate_pred - test["lam_true"].to_numpy()) ** 2)))
+        return out
     prob = 1.0 / (1.0 + np.exp(-pred))
     return {"auc": float(roc_auc_score(y, prob)),
             "logloss": float(log_loss(y, np.clip(prob, 1e-12, 1 - 1e-12)))}
 
 
 def _val_split(bench: Bench) -> Tuple[Bench, Bench]:
-    """Last-by-t 25% of the train window becomes validation."""
+    """Last-by-t 25% of the train window becomes validation (class-preserving)."""
+    from dataclasses import replace
     tr = bench.train
     q = float(tr["t"].quantile(0.75))
-    inner = Bench(df=tr[tr["t"] < q], partition_cols=bench.partition_cols,
-                  extra_cols=bench.extra_cols, task=bench.task, cut=q)
-    val = Bench(df=tr, partition_cols=bench.partition_cols,
-                extra_cols=bench.extra_cols, task=bench.task, cut=q)
+    inner = replace(bench, df=tr[tr["t"] < q], cut=q)
+    val = replace(bench, df=tr, cut=q)
     return inner, val
 
 
@@ -46,7 +54,7 @@ def tune(model: Model, bench: Bench, n_trials: int = 8, seed: int = 0) -> dict:
     rng = np.random.default_rng(seed)
     combos = list(itertools.product(*grid.values()))
     rng.shuffle(combos)
-    key = "rmse" if bench.task == "mse" else "logloss"
+    key = {"mse": "rmse", "poisson": "poisson_dev"}.get(bench.task, "logloss")
     inner, val = _val_split(bench)
     best, best_score = {}, np.inf
     for combo in combos[:n_trials]:
