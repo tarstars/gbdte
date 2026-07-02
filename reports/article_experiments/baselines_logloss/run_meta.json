@@ -1,0 +1,5 @@
+{
+  "suite": "baselines_logloss",
+  "git": "d679c046eb12815781ebeb855d492d9d29b42e02",
+  "seeds": 10
+}

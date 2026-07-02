@@ -1,0 +1,37 @@
+{
+  "statistic": 248.4300000000003,
+  "p_value": 1.4301801078896454e-53,
+  "avg_ranks": {
+    "gbdte": 2.495,
+    "gbdte_auto": 3.365,
+    "gbdte_const": 1.38,
+    "gbdte_wrong": 2.76
+  },
+  "n_blocks": 200,
+  "nemenyi_p": {
+    "gbdte": {
+      "gbdte": 1.0,
+      "gbdte_auto": 9.567979741831323e-11,
+      "gbdte_const": 0.0,
+      "gbdte_wrong": 0.16890628960987553
+    },
+    "gbdte_auto": {
+      "gbdte": 9.567979741831323e-11,
+      "gbdte_auto": 1.0,
+      "gbdte_const": 0.0,
+      "gbdte_wrong": 1.6525221256502576e-05
+    },
+    "gbdte_const": {
+      "gbdte": 0.0,
+      "gbdte_auto": 0.0,
+      "gbdte_const": 1.0,
+      "gbdte_wrong": 0.0
+    },
+    "gbdte_wrong": {
+      "gbdte": 0.16890628960987553,
+      "gbdte_auto": 1.6525221256502576e-05,
+      "gbdte_const": 0.0,
+      "gbdte_wrong": 1.0
+    }
+  }
+}

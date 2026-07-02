@@ -1,0 +1,31 @@
+{
+  "suite": "baselines_mse",
+  "git": "d679c046eb12815781ebeb855d492d9d29b42e02",
+  "presets": {
+    "mse_k8": {
+      "task": "mse",
+      "k_groups": 8,
+      "basis": "fourier",
+      "omega": 50.0,
+      "rho": 1.0,
+      "drift": 1.0,
+      "noise": 0.01,
+      "cut": 0.5,
+      "n_rows": 4000,
+      "seed": 0
+    },
+    "mse_k128": {
+      "task": "mse",
+      "k_groups": 128,
+      "basis": "fourier",
+      "omega": 50.0,
+      "rho": 1.0,
+      "drift": 1.0,
+      "noise": 0.01,
+      "cut": 0.5,
+      "n_rows": 10000,
+      "seed": 0
+    }
+  },
+  "seeds": 10
+}
