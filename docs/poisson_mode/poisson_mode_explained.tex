@@ -1,0 +1,327 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=2.4cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+\newcommand{\code}[1]{\texttt{\small #1}}
+
+\title{The Poisson Mode of GBDTE:\\ What It Is, How It Works, and What Is Broken}
+\author{Package documentation --- \code{golang/poisson\_legacy} and\\
+\code{python/extra\_boost\_py/experiments/poisson\_bench.py}}
+\date{July 3, 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This document explains, from first principles, what the Poisson mode of the GBDTE
+package models, how the legacy Go implementation trains it, how the new synthetic
+benchmark generator produces data for it, and --- based on the empirical validation of
+2026-07-02 --- where the implementation is inconsistent and why. It is meant as the
+shared mental model before fixing the engine. Statements about the code cite exact
+files and functions; statements about behavior cite the reproducible tests in
+\code{python/tests/test\_poisson\_semantics.py}.
+\end{abstract}
+
+\section{The problem the Poisson mode solves}
+
+\subsection{Counts instead of values or labels}
+
+The package's other two losses answer ``what value?'' (MSE) and ``which class?''
+(LogLoss). The Poisson mode answers \emph{``how many events, and at what rate?''}:
+insurance claims per policy-year, machine failures per month, calls per hour, air-traffic
+conflicts per sector-day. The classical tool is Poisson regression, a generalized linear
+model in which a count $y$ is modeled as
+\[
+y \sim \mathrm{Poisson}(\mu), \qquad \mu = \mathbb{E}[y \mid x],
+\]
+and the model is fitted by maximizing the Poisson log-likelihood
+$\sum_i \left( y_i \log \mu_i - \mu_i \right)$ (up to a term not depending on the model)
+\cite{mccullagh1989,cameron2013}. Modern gradient-boosting packages all offer this as an
+objective: LightGBM (\code{objective=poisson}), XGBoost (\code{count:poisson}), CatBoost
+(\code{loss\_function=Poisson}) \cite{lgbmdocs,xgbdocs,cbdocs}; in actuarial practice
+Poisson-boosted trees are the standard workhorse for claim frequency
+\cite{ohlsson2010,denuit2020,wuthrich2023,yang2018}.
+
+\subsection{The GBDTE twist: intensity that drifts in time}
+
+All of the above predict a \emph{constant} expected count per feature vector. GBDTE's
+premise is different: the event rate is a \emph{function of time},
+\[
+\lambda(t \mid x) \;=\; \text{events per unit time for an object with features } x,
+\]
+and what we care about is \emph{extrapolating} $\lambda$ into a future time window that
+the training data never saw. This is the inhomogeneous Poisson process setting
+\cite{daley2003}: over a window $W$, an object with intensity $\lambda(t)$ produces
+$\mathrm{Poisson}\!\left(\int_W \lambda(t)\,dt\right)$ events, and the log-likelihood of
+observed event times $t_1,\dots,t_n$ is
+\begin{equation}
+\label{eq:pp-loglik}
+\ell \;=\; \sum_{i=1}^{n} \log \lambda(t_i) \;-\; \int_W \lambda(t)\,dt .
+\end{equation}
+
+GBDTE applies its usual role separation to this problem:
+\begin{itemize}
+\item \textbf{partition features} $X^{(p)}$ (stable object attributes) drive the tree
+      splits and identify \emph{which} intensity regime an object belongs to;
+\item \textbf{extrapolation basis} $\varphi(t)$ (e.g.\ $(1, t)$) lives inside each leaf:
+      the leaf stores a weight vector $w$ and predicts the time-varying intensity
+      \[
+      \lambda(t) \;=\; w^\top \varphi(t)
+      \]
+      --- a \emph{linear intensity model per leaf}, so the fitted rate has a trend that
+      can be carried into the future window.
+\end{itemize}
+A conventional Poisson booster puts $t$ among the ordinary features and therefore
+predicts a piecewise-constant function of $t$; beyond the last training split it
+extrapolates a constant. GBDTE's leaf-linear intensity is exactly what
+distinguishes it --- the same argument as in the MSE and LogLoss modes, applied to
+event rates. Note the additive form $\lambda = w^\top\varphi(t)$ differs from the
+GLM convention $\log\mu = x^\top\beta$ \cite{mccullagh1989}: the intensity is linear,
+not log-linear, which permits a closed-form Newton step per leaf but requires care to
+keep $\lambda > 0$.
+
+\section{The data contract of \code{PoissonLegacyBooster}}
+
+The Python API (\code{python/extra\_boost\_py/poisson\_booster.py}) takes five arrays.
+The semantics below were validated empirically on 2026-07-02
+(\code{test\_poisson\_semantics.py}); the engine itself documents none of this.
+
+\begin{center}\small
+\begin{tabular}{lll}
+\toprule
+Argument & Shape & Meaning \\
+\midrule
+\code{bjids} & $(n,)$ int32 & object (cohort) identifier; rows of one object share it \\
+\code{freqs} & $(n,)$ f64 & event \textbf{count} observed in the row's time bin; must be $> 0$ \\
+\code{features\_inter} & $(n, p)$ f64 & partition features (constant within an object) \\
+\code{features\_extra} & $(n, d)$ f64 & $\varphi(t_{\text{row}})$ evaluated at the row's bin center \\
+\code{psi} & $(d,)$ f64 & $\int_{W} \varphi(t)\,dt$ over the \emph{whole observation window} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+So one ``row'' is \emph{(object, time bin, count)}: an object observed over $W=[0,c]$
+partitioned into bins contributes one row per bin. $\psi$ carries the exposure term of
+Eq.~\eqref{eq:pp-loglik}: for a leaf model $\lambda = w^\top\varphi$,
+$\int_W \lambda = w^\top \psi$ per object.
+
+Hard constraints found empirically:
+\begin{itemize}
+\item \textbf{zero counts crash the process} (a \code{munmap\_chunk} abort inside the
+      CGO layer) --- the benchmark generator therefore guarantees counts $\ge 1$;
+\item \code{predict(F\_inter, $\varphi$(t))} returns the intensity \textbf{in per-bin
+      count units}, i.e.\ the expected count of one row, not a rate per unit time;
+\item only \code{n\_stages=1} produces consistent extra-mode results (Section~\ref{sec:bug}).
+\end{itemize}
+
+\section{How training works (\code{golang/poisson\_legacy})}
+
+Training alternates tree building and bias accumulation
+(\code{booster.go:Train}): each stage builds one tree against the current prediction
+(\emph{bias}), then adds the tree's predictions to the bias. Leaf values of the first
+tree are used at full scale; later trees are damped by the learning rate
+(\code{tree.go:leafFromPrediction}). The interesting part is how leaf weights are
+computed, and it differs between the first tree and all subsequent ones
+(\code{pmatrix.go:WholeLoss} dispatches on \code{bias == nil}).
+
+\subsection{First tree, extra mode: least squares on counts}
+
+\code{wholeLossFirstTreeExtra} solves, for every candidate leaf $L$,
+\begin{equation}
+\label{eq:first-tree}
+\Big( \sum_{i \in L} \varphi_i \varphi_i^\top + \lambda_{\text{reg}} I \Big)\, w
+\;=\; \sum_{i \in L} y_i\, \varphi_i ,
+\end{equation}
+i.e.\ an \emph{ordinary least-squares regression of the counts on the basis}. This is
+not the Poisson likelihood --- it is its Gaussian surrogate --- but it has two convenient
+properties: it is exact in one shot (no iteration), and if the counts follow a linear
+trend it reproduces it exactly. This is why the engine's own Go test
+(\code{TestExtraPoissonFirstTree}) sees per-row predictions equal to the training
+frequencies, and why our validation recovered $\lambda_0(t) = 2+2t$ vs
+$\lambda_1(t) = 4-2t$ perfectly with one stage. The fitted $w$ is in
+\textbf{count-per-bin units} because the targets $y_i$ are counts. Note that
+Eq.~\eqref{eq:first-tree} does not use $\psi$ at all.
+
+\subsection{Split search}
+
+For each split candidate the engine evaluates the post-fit loss on both sides using
+cumulative-sum tables over rows sorted per feature (\code{Gax}), exactly like the main
+GBDTE engine; an optional \code{unbalanced\_penalty} discourages extreme splits. Leaf
+weight vectors for the winning split come out of the same pass (\code{DeltaUp} /
+\code{DeltaDown}).
+
+\subsection{Later trees, extra mode: Newton on the Poisson process likelihood}
+
+\code{wholeLossNextTreeExtra} treats the new tree as an \emph{additive correction}
+$u(t) = w^\top\varphi(t)$ on top of the current intensity $b(t)$ (the bias), and takes
+one damped Newton step on Eq.~\eqref{eq:pp-loglik} around $u = 0$:
+\begin{equation}
+\label{eq:newton}
+g \;=\; N_L\, \psi \;-\; \sum_{i \in L} \frac{y_i\, \varphi_i}{b_i},
+\qquad
+H \;=\; \sum_{i \in L} \frac{y_i\, \varphi_i \varphi_i^\top}{b_i^2},
+\qquad
+w \;=\; -H^{-1} g,
+\end{equation}
+where $N_L$ counts distinct objects in the leaf (\code{countObjects}). This is the
+correct derivative structure for Eq.~\eqref{eq:pp-loglik}: the exposure term
+contributes $N_L \psi$ (each object integrates the correction over the whole window),
+the event term contributes $\sum y\varphi/b$.
+
+\section{The inconsistency, precisely}
+\label{sec:bug}
+
+Equations \eqref{eq:first-tree} and \eqref{eq:newton} do not speak the same units.
+
+\begin{itemize}
+\item The first tree fits $b(t)$ in \textbf{per-bin counts}: its stationary condition
+      matches $\sum y_i \varphi_i$, where $y_i$ are counts in bins of width $\Delta$.
+\item The Newton stage's stationary condition, $\sum_i y_i \varphi_i / \lambda(t_i) =
+      N_L\,\psi$, is satisfied by an intensity in \textbf{events per unit time}: for a
+      constant true rate $r$, plugging $\lambda = r$ makes the left side
+      $\approx N_L \int_W \varphi$ only because
+      $\sum_{\text{bins}} (r\Delta)\varphi(t_b)/r = \Delta \sum_b \varphi(t_b) \approx
+      \int_W \varphi$. Plugging the first tree's count-scale intensity
+      $\lambda = r\Delta$ instead inflates the left side by $1/\Delta$.
+\end{itemize}
+
+So after a perfect first tree, the second stage's gradient is far from zero --- not
+because the fit is bad, but because the exposure term evaluates it on a different scale.
+The observed behavior follows: with \code{n\_stages=1} the recovery of a known two-group
+linear intensity is exact (to sampling noise); with \code{n\_stages=2} every prediction
+shifts by a systematic offset; with many stages the iteration settles at a fixed point
+that is \emph{not} the maximizer of the engine's own likelihood (verified by solving the
+MLE independently). The strict-\code{xfail} test
+\code{test\_extra\_mode\_multi\_stage\_is\_consistent} pins this defect.
+
+\paragraph{Fix directions (to be designed before coding).}
+\begin{enumerate}
+\item \textbf{Make everything per-row Poisson regression on binned counts.} Replace the
+      per-object exposure $N_L\psi$ with a per-row exposure $\varphi(t_i)\Delta_i$
+      (row $i$'s bin integrates $\int_{\text{bin}} \varphi \approx \varphi(t_b)\Delta$).
+      Then the likelihood is the standard binned-count Poisson likelihood, units agree
+      with the first tree automatically, $\psi$ and \code{bjids} become unnecessary,
+      zero counts become legal, and results match what external Poisson boosters
+      optimize. This is the simplest and most conventional repair
+      \cite{cameron2013,ohlsson2010}.
+\item \textbf{Keep the point-process form, fix the first tree.} Fit the first tree by
+      the same Newton objective (starting from a constant initial intensity) so all
+      stages optimize Eq.~\eqref{eq:pp-loglik} in rate units, and document that
+      \code{freqs} rows are event/bin counts while predictions are rates. More faithful
+      to the ``true'' inhomogeneous process, but more work and still needs a
+      positivity guard for $\lambda$.
+\end{enumerate}
+Either way, a positivity safeguard for leaf intensities matters: the current linear
+$\lambda(t)$ fitted on $t < 0.6$ can cross zero inside the evaluation window, which is
+what blew up the Poisson deviance at some depths in the benchmark run.
+
+\section{The benchmark generator}
+
+\code{poisson\_bench.py} builds the Poisson analog of the paper's grouped MSE benchmark
+--- ``grouped drifting intensity'':
+
+\begin{enumerate}
+\item \textbf{Objects are cohorts.} Each of \code{n\_objects} objects represents a
+      cohort of \code{exposure} identical units (e.g.\ a portfolio segment). Cohorts
+      make per-bin counts comfortably positive, which the engine requires.
+\item \textbf{Latent group $\to$ intensity.} Object $j$ carries binary partition
+      features encoding a latent group $g$ out of \code{k\_groups} (plus the continuous
+      nuisance feature $f_m$). The group's per-unit intensity is linear in time:
+      \[
+      \lambda_g(t) \;=\; \beta_{g,0} + \beta_{g,1}\, t,
+      \qquad \beta_{g,0} \sim U(1,5),\quad
+      \beta_{g,1} = \text{drift} \cdot u \cdot \beta_{g,0},\ u \sim U(-0.8, 0.8),
+      \]
+      so intensities stay positive on $[0,1]$ by construction.
+\item \textbf{Role purity $\rho$.} As in the MSE family, the actual intensity is a
+      mixture $\rho\,\lambda_{\text{group}} + (1-\rho)\,\lambda_m$, where $\lambda_m$
+      depends smoothly on the nuisance $m$; at $\rho = 1$ the partition features carry
+      all structure, at $\rho = 0$ none.
+\item \textbf{Binned observation.} Time $[0,1]$ splits into \code{n\_bins} equal bins;
+      the row for (object $j$, bin $b$) gets count
+      $y \sim \mathrm{Poisson}\!\big(\lambda_j(t_b)\, \Delta \cdot \text{exposure}\big)$,
+      clipped to $\ge 1$ (measured distortion at the default exposure: the average
+      zero-probability is $6\%$; at exposure 60 it vanishes).
+\item \textbf{Temporal split.} Train on $t < 0.6$, evaluate on $t \ge 0.6$: the model
+      must extrapolate each cohort's trend into an unseen future window --- the same
+      protocol as the MSE ($t<0.5$) and LogLoss ($t<0.4$) benchmarks.
+\item \textbf{Dual form.} The same dataset is exposed (a) as events
+      (\code{bjids, freqs, features, $\varphi$, $\psi$}) for GBDTE and (b) as a plain
+      table (rows = object $\times$ bin, target = count, features = partition
+      candidates + $t$) for LightGBM/XGBoost/CatBoost with their native Poisson
+      objectives. A \code{lam\_true} column stores the true intensity, enabling an
+      oracle upper bound and an intensity-RMSE diagnostic that real data cannot offer.
+\end{enumerate}
+
+Evaluation uses the mean Poisson deviance on the future window,
+\[
+D \;=\; \frac{2}{n}\sum_i \Big[ y_i \log \tfrac{y_i}{\hat\mu_i} - (y_i - \hat\mu_i) \Big],
+\]
+the standard proper scoring rule for count models \cite{cameron2013,wuthrich2023}, plus
+the synthetic-only intensity RMSE against \code{lam\_true}.
+
+\section{Where things stand}
+
+With the engine restricted to a single stage, GBDTE-Poisson currently \emph{loses} to
+conventional Poisson boosters on this benchmark (mean deviance $1.02$--$1.03$ vs.\
+$0.85$--$0.89$ for CatBoost/LightGBM; Bayes oracle $0.79$--$0.80$; 10 seeds, Friedman
+$p = 1.3\cdot 10^{-20}$), and the wrong-roles ablation is worst ($1.45$--$1.50$), as
+expected. The loss is structural: one tree must simultaneously discover the partition
+and fit stable leaf trends, with no boosting to correct residual errors --- and
+mis-fitted leaf trends extrapolate badly (occasionally through zero). Fixing the
+multi-stage update per Section~\ref{sec:bug} is therefore the prerequisite for any
+paper-grade Poisson claim; the benchmark, baselines, statistics, and reports are already
+in place and re-run with one command:
+\begin{center}
+\code{PYTHONPATH=python .venv/bin/python scripts/run\_article\_experiments.py
+--suite baselines\_poisson --seeds 10}
+\end{center}
+
+\begin{thebibliography}{99}\small
+
+\bibitem{mccullagh1989} P.~McCullagh and J.~A.~Nelder.
+\emph{Generalized Linear Models}, 2nd ed. Chapman \& Hall, 1989.
+
+\bibitem{cameron2013} A.~C.~Cameron and P.~K.~Trivedi.
+\emph{Regression Analysis of Count Data}, 2nd ed. Cambridge University Press, 2013.
+
+\bibitem{daley2003} D.~J.~Daley and D.~Vere-Jones.
+\emph{An Introduction to the Theory of Point Processes, Vol.~I: Elementary Theory and
+Methods}, 2nd ed. Springer, 2003. (Inhomogeneous Poisson processes and the
+log-likelihood \eqref{eq:pp-loglik}.)
+
+\bibitem{friedman2001} J.~H.~Friedman.
+Greedy function approximation: a gradient boosting machine.
+\emph{Annals of Statistics} 29(5):1189--1232, 2001.
+
+\bibitem{ohlsson2010} E.~Ohlsson and B.~Johansson.
+\emph{Non-Life Insurance Pricing with Generalized Linear Models}. Springer, 2010.
+(Poisson claim-frequency modeling with exposure offsets.)
+
+\bibitem{denuit2020} M.~Denuit, D.~Hainaut, and J.~Trufin.
+\emph{Effective Statistical Learning Methods for Actuaries II: Tree-Based Methods and
+Extensions}. Springer, 2020. (Poisson deviance as the split criterion for count data.)
+
+\bibitem{wuthrich2023} M.~V.~W\"uthrich and M.~Merz.
+\emph{Statistical Foundations of Actuarial Learning and its Applications}.
+Springer Actuarial, 2023. Open access:
+\url{https://link.springer.com/book/10.1007/978-3-031-12409-9}.
+
+\bibitem{yang2018} Y.~Yang, W.~Qian, and H.~Zou.
+Insurance premium prediction via gradient tree-boosted Tweedie compound Poisson models.
+\emph{Journal of Business \& Economic Statistics} 36(3):456--470, 2018.
+arXiv:\href{https://arxiv.org/abs/1508.06378}{1508.06378}.
+
+\bibitem{lgbmdocs} LightGBM documentation: \code{objective=poisson}.
+\url{https://lightgbm.readthedocs.io/en/latest/Parameters.html}.
+
+\bibitem{xgbdocs} XGBoost documentation: \code{count:poisson}.
+\url{https://xgboost.readthedocs.io/en/stable/parameter.html}.
+
+\bibitem{cbdocs} CatBoost documentation: regression loss functions (Poisson).
+\url{https://catboost.ai/docs/en/concepts/loss-functions-regression}.
+
+\end{thebibliography}
+\end{document}
