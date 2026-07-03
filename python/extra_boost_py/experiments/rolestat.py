@@ -47,16 +47,26 @@ def separability_index(bench: Bench) -> float:
     return float(np.mean(scores)) if scores else 0.0
 
 
-def auto_roles(bench: Bench, drift_threshold: float = 0.6) -> Tuple[List[str], List[str]]:
-    """Assign candidate columns to partition vs leaf blocks by drift score."""
+def auto_roles(bench: Bench, drift_threshold: float = 0.6,
+               max_leaf: int = 4) -> Tuple[List[str], List[str]]:
+    """Assign candidate columns to partition vs leaf blocks by drift score.
+
+    At most `max_leaf` drifting features join the leaf block (highest drift first);
+    near-constant columns never do — both guards keep the per-leaf linear system
+    well-conditioned on real data."""
     df = bench.df
     t = df["t"].to_numpy()
-    partition, leaf = [], ["t"]
+    partition, drifting = [], []
     for col in bench.partition_cols:
-        if drift_score(df[col].to_numpy(), t) >= drift_threshold:
-            leaf.append(col)
+        x = df[col].to_numpy()
+        score = drift_score(x, t)
+        if score >= drift_threshold and np.std(x) > 1e-12:
+            drifting.append((score, col))
         else:
             partition.append(col)
+    drifting.sort(reverse=True)
+    leaf = ["t"] + [col for _, col in drifting[:max_leaf]]
+    partition += [col for _, col in drifting[max_leaf:]]
     return partition, leaf
 
 

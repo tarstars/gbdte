@@ -59,6 +59,12 @@ class GBDTEModel(Model):
             return (part if part else ["e_0"]), ["e_0"] + leaf
         raise ValueError(self.roles)
 
+    def _extra_matrix(self, df: pd.DataFrame) -> np.ndarray:
+        """Leaf-block matrix, standardized (constant columns left as-is) so the
+        per-leaf linear system stays well-conditioned on raw real-world features."""
+        m = _xy(df, self._extra_cols)
+        return np.ascontiguousarray((m - self._extra_mean) / self._extra_scale)
+
     def fit(self, bench: Bench, params: Optional[dict] = None) -> None:
         self._inter_cols, self._extra_cols = self._blocks(bench)
         p = params or {}
@@ -68,12 +74,17 @@ class GBDTEModel(Model):
                            learning_rate=p.get("learning_rate", 0.1),
                            threads_num=8)
         tr = bench.train
+        raw = _xy(tr, self._extra_cols)
+        std = raw.std(axis=0)
+        const = std < 1e-12
+        self._extra_mean = np.where(const, 0.0, raw.mean(axis=0))
+        self._extra_scale = np.where(const, 1.0, std)
         self._booster = ExtraBooster.train(
-            _xy(tr, self._inter_cols), _xy(tr, self._extra_cols),
+            _xy(tr, self._inter_cols), self._extra_matrix(tr),
             np.ascontiguousarray(tr["y"].to_numpy(dtype=np.float64)), bp)
 
     def predict(self, df: pd.DataFrame) -> np.ndarray:
-        return self._booster.predict(_xy(df, self._inter_cols), _xy(df, self._extra_cols))
+        return self._booster.predict(_xy(df, self._inter_cols), self._extra_matrix(df))
 
 
 class _SKStyleModel(Model):
