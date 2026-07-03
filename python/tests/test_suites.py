@@ -1,6 +1,17 @@
 from pathlib import Path
 
+import pytest
+
 from extra_boost_py.experiments.suites import run_suite
+from extra_boost_py.experiments.suites import _cached_real_names
+
+
+def test_quick_realdata(tmp_path: Path):
+    if not _cached_real_names():
+        pytest.skip("no real-data caches present")
+    out = run_suite("realdata", tmp_path, seeds=2, quick=True)
+    assert (out / "results.csv").exists()
+    assert (out / "separability.csv").exists()
 
 
 def test_quick_regime_map(tmp_path: Path):

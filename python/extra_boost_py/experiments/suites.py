@@ -18,6 +18,7 @@ from .benchgen import Bench, PRESETS, generate
 from .classical_bench import classical_bench
 from .poisson_baselines import make_poisson_models
 from .poisson_bench import POISSON_PRESETS, generate_poisson
+from .realdata import REAL_DATASETS, load_real
 from .rolestat import separability_index
 from .stats import cd_diagram, friedman_nemenyi, run_grid, summary_table
 
@@ -176,10 +177,73 @@ def suite_baselines_poisson(out: Path, seeds: int, quick: bool) -> None:
                   {"poisson_dev": False, "rate_rmse": False})
 
 
+def _cached_real_names() -> List[str]:
+    return [n for n in REAL_DATASETS
+            if (Path("datasets/realdata") / n / "extract.parquet").exists()]
+
+
+def suite_realdata(out: Path, seeds: int, quick: bool) -> None:
+    cached = _cached_real_names()
+    if not cached:
+        raise RuntimeError("no real-data caches under datasets/realdata/; "
+                           "run load_real() for at least one dataset first")
+    names = cached[:1] if quick else cached
+    n_max = 2000 if quick else 60000
+    wanted = ["gbdte", "gbdte_auto", "gbdte_const", "lgbm", "lgbm_linear",
+              "xgb", "catboost"]
+    sep_rows, all_results = [], []
+    for name in names:
+        task = REAL_DATASETS[name].task
+        all_models = make_models(task, include_oracle=False)
+        models = {k: v for k, v in all_models.items() if k in wanted}
+
+        def factory(bname: str, seed: int) -> Bench:
+            bench = load_real(bname, seed=seed, n_max=n_max)
+            sep_rows.append(dict(bench=bname, seed=seed,
+                                 separability=separability_index(bench)))
+            return bench
+
+        res = run_grid(models, None, _seeds(seeds), bench_factory=factory,
+                       bench_names=[name], tune_trials=2 if quick else 8)
+        all_results.append(res)
+
+    results = pd.concat(all_results, ignore_index=True)
+    hib = {"rmse": False, "auc": True, "logloss": False}
+    _write_report(out, results, {"suite": "realdata", "git": _git_sha(),
+                                 "seeds": seeds, "n_max": n_max,
+                                 "datasets": names}, hib)
+    sep = pd.DataFrame(sep_rows).drop_duplicates(["bench", "seed"])
+    sep.to_csv(out / "separability.csv", index=False)
+
+    rows = []
+    for name in names:
+        metric = "rmse" if REAL_DATASETS[name].task == "mse" else "logloss"
+        sub = results[(results["bench"] == name) & (results["metric"] == metric)]
+        perf = sub.groupby("model")["value"].mean()
+        if {"gbdte_auto", "lgbm"} <= set(perf.index):
+            rows.append(dict(bench=name, metric=metric,
+                             rel=perf["gbdte_auto"] / perf["lgbm"],
+                             separability=sep[sep["bench"] == name]["separability"].mean()))
+    gain = pd.DataFrame(rows)
+    gain.to_csv(out / "gain_vs_separability.csv", index=False)
+    if len(gain) >= 2:
+        fig, ax = plt.subplots(figsize=(4.6, 3.4))
+        ax.scatter(gain["separability"], gain["rel"])
+        for _, r in gain.iterrows():
+            ax.annotate(f' {r["bench"]}', (r["separability"], r["rel"]), fontsize=8)
+        ax.axhline(1.0, color="0.6", lw=1, ls="--")
+        ax.set_xlabel("separability index (pre-training)")
+        ax.set_ylabel("GBDTE / LightGBM (lower = GBDTE wins)")
+        fig.tight_layout()
+        fig.savefig(out / "gain_vs_separability.pdf")
+        plt.close(fig)
+
+
 SUITES = {
     "baselines_mse": suite_baselines_mse,
     "baselines_logloss": suite_baselines_logloss,
     "baselines_poisson": suite_baselines_poisson,
+    "realdata": suite_realdata,
     "regime_map": suite_regime_map,
     "rolestat_validation": suite_rolestat_validation,
     "auto_roles": suite_auto_roles,
