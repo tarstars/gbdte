@@ -22,7 +22,7 @@ It stays lightweight for research while keeping commands deterministic.
 - `golang/extra_boost/ebl`: gradient boosting engine (tree growing, split search, losses) with Go unit tests.
 - `golang/extra_boost/pybridge`: CGO entry point compiled into a shared library consumed from Python (`libextra_boost.*`).
 - `golang/extra_boost/extra_boost_main`: minimal CLI harness for ad-hoc experimentation.
-- `golang/poisson_legacy`: legacy Poisson booster and its CGO bridge for back-compat experiments.
+- `golang/poisson_legacy`: legacy Poisson booster and its CGO bridge for back-compat experiments. Documented in [docs/poisson_mode/README.md](docs/poisson_mode/README.md) (data contract, quick start, known limitations), with the full write-up in [docs/poisson_mode/poisson_mode_explained.pdf](docs/poisson_mode/poisson_mode_explained.pdf) and a runnable demo in [notebooks/poisson_mode/poisson_mode_demo.ipynb](notebooks/poisson_mode/poisson_mode_demo.ipynb).
 - `notebooks/`: experiment notebooks for MSE/logloss analyses (including archived variants).
 - `python/extra_boost_py`: Python package providing ctypes bindings (`bridge.py`), high-level booster API, classical dataset generator, metrics, and the orchestration pipeline.
 - `python/examples/full_pipeline.py`: end-to-end demo (generate dataset → train booster → evaluate → persist model).
