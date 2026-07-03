@@ -28,6 +28,7 @@ class RealDatasetSpec:
     time_col: str
     target_col: str
     task: str                 # "mse" | "logloss"
+    drop_cols: Tuple[str, ...] = ()   # ids/pseudo-time columns excluded from features
 
 
 REAL_DATASETS = {
@@ -38,7 +39,8 @@ REAL_DATASETS = {
     "sberbank": RealDatasetSpec(
         name="sberbank", kaggle_ref="sberbank-russian-housing-market",
         kaggle_kind="competition", files=("train.csv.zip",),
-        time_col="timestamp", target_col="price_doc", task="mse"),
+        time_col="timestamp", target_col="price_doc", task="mse",
+        drop_cols=("id",)),   # monotone row index = pseudo-time, drift score 1.0
     "homecredit": RealDatasetSpec(
         name="homecredit", kaggle_ref="home-credit-credit-risk-model-stability",
         kaggle_kind="competition",
@@ -63,7 +65,7 @@ def frame_to_bench(df: pd.DataFrame, spec: RealDatasetSpec, seed: int,
            "y": df[spec.target_col].to_numpy(dtype=np.float64)}
     partition_cols = []
     for col in df.columns:
-        if col in (spec.time_col, spec.target_col):
+        if col in (spec.time_col, spec.target_col) or col in spec.drop_cols:
             continue
         s = df[col]
         if pd.api.types.is_numeric_dtype(s):
