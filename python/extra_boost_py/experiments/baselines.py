@@ -65,7 +65,8 @@ class GBDTEModel(Model):
         bp = BoosterParams(loss=bench.task,
                            n_stages=p.get("n_stages", 48),
                            max_depth=p.get("max_depth", 5),
-                           learning_rate=p.get("learning_rate", 0.1))
+                           learning_rate=p.get("learning_rate", 0.1),
+                           threads_num=8)
         tr = bench.train
         self._booster = ExtraBooster.train(
             _xy(tr, self._inter_cols), _xy(tr, self._extra_cols),

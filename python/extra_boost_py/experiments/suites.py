@@ -188,7 +188,7 @@ def suite_realdata(out: Path, seeds: int, quick: bool) -> None:
         raise RuntimeError("no real-data caches under datasets/realdata/; "
                            "run load_real() for at least one dataset first")
     names = cached[:1] if quick else cached
-    n_max = 2000 if quick else 60000
+    n_max = 2000 if quick else 20000   # timing probe 2026-07-03: engine ~45s/6k rows
     wanted = ["gbdte", "gbdte_auto", "gbdte_const", "lgbm", "lgbm_linear",
               "xgb", "catboost"]
     sep_rows, all_results = [], []
