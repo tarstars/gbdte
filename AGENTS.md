@@ -8,6 +8,13 @@ suites, generated reports, package docs) happens here. Article/paper work happen
 The article repo's `gbdte-main/` directory is a frozen snapshot of this repo (no git
 history); never edit it, regenerate it from `main` when packaging a submission.
 
+## Working notes rule
+Persist findings, decisions, and measurements in `.md` files as they happen, so a
+flushed/compacted agent context can be restored from the repo alone: engine findings and
+validated semantics belong in `docs/` (e.g. `docs/poisson_mode/README.md`), experiment
+conclusions in the per-suite reports under `reports/`, design decisions in
+`docs/superpowers/specs/`. Nothing load-bearing should exist only in a conversation.
+
 ## Project Structure & Module Organization
 - `golang/extra_boost/ebl`: core gradient boosting engine in Go; unit tests live beside the implementation.
 - `golang/extra_boost/pybridge`: CGO entry point compiled into the shared library consumed by Python.
