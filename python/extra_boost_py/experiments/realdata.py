@@ -90,7 +90,9 @@ def _download(spec: RealDatasetSpec, cache_dir: Path) -> Path:
         stem = target.with_suffix("") if target.suffix == ".zip" else target
         if target.exists() or stem.exists():
             continue
-        cmd = ["kaggle", kind, "download", spec.kaggle_ref, "-f", f, "-p", str(raw)]
+        import sys
+        kaggle_bin = str(Path(sys.executable).parent / "kaggle")
+        cmd = [kaggle_bin, kind, "download", spec.kaggle_ref, "-f", f, "-p", str(raw)]
         res = subprocess.run(cmd, capture_output=True, text=True)
         if res.returncode != 0:
             raise RuntimeError(
