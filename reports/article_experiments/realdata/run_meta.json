@@ -1,0 +1,11 @@
+{
+  "suite": "realdata",
+  "git": "76c95c377dc6228f03361cf8e6d2a77f3a9ac7b5",
+  "seeds": 5,
+  "n_max": 20000,
+  "datasets": [
+    "weather",
+    "sberbank",
+    "homecredit"
+  ]
+}
