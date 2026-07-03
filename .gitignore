@@ -65,3 +65,4 @@ python/extra_boost_py/libextra_*.dylib
 python/extra_boost_py/libextra_*.dll
 python/extra_boost_py/libextra_*.h
 catboost_info/
+dist/
