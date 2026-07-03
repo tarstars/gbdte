@@ -66,7 +66,7 @@ def frame_to_bench(df: pd.DataFrame, spec: RealDatasetSpec, seed: int,
         if col in (spec.time_col, spec.target_col):
             continue
         s = df[col]
-        if np.issubdtype(s.dtype, np.number):
+        if pd.api.types.is_numeric_dtype(s):
             v = s.to_numpy(dtype=np.float64)
             med = np.nanmedian(v)
             out[col] = np.where(np.isnan(v), 0.0 if np.isnan(med) else med, v)
