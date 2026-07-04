@@ -41,6 +41,12 @@ REAL_DATASETS = {
         kaggle_kind="competition", files=("train.csv.zip",),
         time_col="timestamp", target_col="price_doc", task="mse",
         drop_cols=("id",)),   # monotone row index = pseudo-time, drift score 1.0
+    "gassensor": RealDatasetSpec(
+        name="gassensor",
+        kaggle_ref="https://archive.ics.uci.edu/static/public/224/gas+sensor+array+drift+dataset.zip",
+        kaggle_kind="uci", files=("gas.zip",),
+        time_col="batch", target_col="y", task="logloss",
+        drop_cols=("gas",)),   # raw class kept only to build the binary target
     "latam": RealDatasetSpec(
         name="latam",
         kaggle_ref="mendeley:mhb4zn3258",   # public direct download, not kaggle
@@ -94,7 +100,11 @@ def frame_to_bench(df: pd.DataFrame, spec: RealDatasetSpec, seed: int,
     if len(df) > n_max:
         rng = np.random.default_rng(seed)
         df = df.iloc[rng.choice(len(df), n_max, replace=False)]
-    t_raw = pd.to_datetime(df[spec.time_col]).astype("int64").to_numpy(dtype=np.float64)
+    time_series = df[spec.time_col]
+    if pd.api.types.is_numeric_dtype(time_series):
+        t_raw = time_series.to_numpy(dtype=np.float64)   # batch index, year, etc.
+    else:
+        t_raw = pd.to_datetime(time_series).astype("int64").to_numpy(dtype=np.float64)
     t = (t_raw - t_raw.min()) / max(t_raw.max() - t_raw.min(), 1.0)
 
     out = {"t": t, "e_0": np.ones(len(df)), "e_1": t,
@@ -119,9 +129,39 @@ def frame_to_bench(df: pd.DataFrame, spec: RealDatasetSpec, seed: int,
                  extra_cols=["e_0", "e_1"], task=spec.task, cut=cut)
 
 
+def _parse_gas_batch(path, batch_idx: int) -> list:
+    """Parse a UCI Gas Sensor Drift batch*.dat line. Robust to both the real layout
+    'label idx:val ...' and the documented 'label;conc idx:val ...' (concentration, if
+    present, is embedded in the first token and dropped)."""
+    rows = []
+    with open(path) as fh:
+        for line in fh:
+            line = line.strip()
+            if not line:
+                continue
+            toks = line.split()
+            feats = {"gas": int(float(toks[0].split(";")[0])), "batch": batch_idx}
+            for tok in toks[1:]:
+                if ":" in tok:
+                    idx, val = tok.split(":")
+                    feats[f"s{int(idx)}"] = float(val)
+            rows.append(feats)
+    return rows
+
+
 def _download(spec: RealDatasetSpec, cache_dir: Path) -> Path:
     raw = cache_dir / spec.name / "raw"
     raw.mkdir(parents=True, exist_ok=True)
+    if spec.kaggle_kind == "uci":
+        has_dat = any(raw.rglob("batch*.dat"))
+        if not has_dat:
+            zip_path = raw / "gas.zip"
+            subprocess.run(["curl", "-sL", "--max-time", "600", "-o", str(zip_path),
+                            spec.kaggle_ref], check=True)
+            subprocess.run(["unzip", "-o", "-q", str(zip_path), "-d", str(raw)], check=True)
+        return raw
+    if spec.kaggle_kind == "worldbank":
+        return raw   # API fetched in _read_raw
     if spec.kaggle_kind == "mendeley":
         for f in spec.files:
             target = raw / f
@@ -164,6 +204,16 @@ def _read_raw(spec: RealDatasetSpec, raw: Path) -> pd.DataFrame:
         card = pd.read_csv(raw / "customer_data.csv")
         tx = pd.read_csv(raw / "transactions_data.csv")
         return _latam_frame(card, tx)
+    if spec.name == "gassensor":
+        import glob
+        dat_files = sorted(glob.glob(str(raw / "**" / "batch*.dat"), recursive=True))
+        rows = []
+        for path in dat_files:
+            b = int("".join(ch for ch in Path(path).stem if ch.isdigit()))
+            rows.extend(_parse_gas_batch(path, b))
+        df = pd.DataFrame(rows).fillna(0.0)
+        df["y"] = (df["gas"] == 1).astype(float)   # one-vs-rest, fixed class 1 (Ethanol)
+        return df
     if spec.name == "weather":
         return pd.read_parquet(raw / "weather.parquet")
     if spec.name == "sberbank":

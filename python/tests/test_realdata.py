@@ -89,3 +89,30 @@ def test_latam_aggregation():
 def pytest_approx_log(n):
     import numpy as np
     return float(np.log1p(n))
+
+
+def test_frame_to_bench_numeric_time():
+    import pandas as pd
+    from extra_boost_py.experiments.realdata import RealDatasetSpec, frame_to_bench
+    df = pd.DataFrame({"batch": np.repeat(np.arange(1, 11), 20).astype(float),
+                       "y": np.random.default_rng(0).standard_normal(200),
+                       "s1": np.random.default_rng(1).standard_normal(200)})
+    spec = RealDatasetSpec(name="x", kaggle_ref="", kaggle_kind="uci", files=(),
+                           time_col="batch", target_col="y", task="logloss")
+    b = frame_to_bench(df, spec, seed=0, n_max=200)
+    assert b.df["t"].between(0, 1).all()
+    assert "s1" in b.partition_cols and "batch" not in b.partition_cols
+
+
+def test_parse_gas_batch():
+    import tempfile, os
+    from extra_boost_py.experiments.realdata import _parse_gas_batch
+    with tempfile.NamedTemporaryFile("w", suffix=".dat", delete=False) as f:
+        f.write("1;10.0 1:0.5 2:-0.25 3:1.0\n6;5.0 1:0.1 2:0.2 3:0.3\n")
+        path = f.name
+    rows = _parse_gas_batch(path, batch_idx=3)
+    os.unlink(path)
+    assert len(rows) == 2
+    assert rows[0]["gas"] == 1 and rows[0]["batch"] == 3
+    assert rows[0]["s1"] == 0.5 and rows[0]["s2"] == -0.25
+    assert "s0" not in rows[1]  # concentration token dropped
