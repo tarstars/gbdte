@@ -1,0 +1,8 @@
+{
+  "suite": "hunt",
+  "git": "d28d70055d4f325cfcb6ad221e45bbebd748dbc7",
+  "green": [
+    "owid_childmort"
+  ],
+  "seeds": 5
+}

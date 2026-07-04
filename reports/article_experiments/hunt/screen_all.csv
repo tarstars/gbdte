@@ -1,0 +1,7 @@
+dataset,task,separability,extrap_gain,green
+owid_childmort,mse,0.2429,0.6073,True
+sberbank,mse,0.4709,0.0482,False
+gassensor,logloss,0.0,0.0145,False
+homecredit,logloss,0.1177,0.0006,False
+weather,mse,0.0642,0.0,False
+latam,mse,0.2001,0.0,False
