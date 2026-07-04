@@ -288,12 +288,67 @@ def suite_realdata_basis(out: Path, seeds: int, quick: bool) -> None:
         out / "separability.csv", index=False)
 
 
+SCREEN_MIN_GAIN = 0.05   # promote to full matrix if per-group linear beats constant fwd
+
+
+def suite_hunt(out: Path, seeds: int, quick: bool) -> None:
+    """Screen every cached candidate (separability + extrapolation_gain), then run the
+    full credibility matrix only on datasets whose extrapolation_gain clears the gate."""
+    import os
+
+    from .baselines import make_real_models
+    from .rolestat import extrapolation_gain
+    cached = _cached_real_names()
+    only = os.environ.get("GBDTE_REALDATA_ONLY")
+    if only:
+        cached = [n for n in cached if n in only.split(",")]
+    if not cached:
+        raise RuntimeError("no real-data caches under datasets/realdata/")
+    n_max = 3000 if quick else 20000
+
+    screen_rows = []
+    for name in cached:
+        b = load_real(name, seed=0, n_max=n_max)
+        screen_rows.append(dict(bench=name, task=REAL_DATASETS[name].task,
+                                separability=separability_index(b),
+                                extrap_gain=extrapolation_gain(b)))
+    screen = pd.DataFrame(screen_rows).sort_values("extrap_gain", ascending=False)
+    out.mkdir(parents=True, exist_ok=True)
+    screen.to_csv(out / "screen.csv", index=False)
+
+    green = [r["bench"] for r in screen_rows if r["extrap_gain"] >= SCREEN_MIN_GAIN]
+    if quick and not green:
+        green = cached[:1]                      # always exercise one in quick mode
+    (out / "run_meta.json").write_text(json.dumps(
+        {"suite": "hunt", "git": _git_sha(), "screen": screen_rows, "green": green,
+         "gate": SCREEN_MIN_GAIN, "seeds": seeds}, indent=2, default=str))
+    if not green:
+        return
+
+    all_results = []
+    for name in green:
+        task = REAL_DATASETS[name].task
+        models = make_real_models(task)
+
+        def factory(bname: str, seed: int) -> Bench:
+            return load_real(bname, seed=seed, n_max=n_max)
+
+        res = run_grid(models, None, _seeds(seeds), bench_factory=factory,
+                       bench_names=[name], tune_trials=2 if quick else 8)
+        all_results.append(res)
+    results = pd.concat(all_results, ignore_index=True)
+    _write_report(out, results, {"suite": "hunt", "git": _git_sha(), "green": green,
+                                 "seeds": seeds},
+                  {"rmse": False, "auc": True, "logloss": False})
+
+
 SUITES = {
     "baselines_mse": suite_baselines_mse,
     "baselines_logloss": suite_baselines_logloss,
     "baselines_poisson": suite_baselines_poisson,
     "realdata": suite_realdata,
     "realdata_basis": suite_realdata_basis,
+    "hunt": suite_hunt,
     "regime_map": suite_regime_map,
     "rolestat_validation": suite_rolestat_validation,
     "auto_roles": suite_auto_roles,

@@ -29,6 +29,7 @@ class RealDatasetSpec:
     target_col: str
     task: str                 # "mse" | "logloss"
     drop_cols: Tuple[str, ...] = ()   # ids/pseudo-time columns excluded from features
+    log_target: bool = False          # y -> log1p(y) (multiplicative/rate targets)
 
 
 REAL_DATASETS = {
@@ -43,7 +44,8 @@ REAL_DATASETS = {
         drop_cols=("id",)),   # monotone row index = pseudo-time, drift score 1.0
     "owid_childmort": RealDatasetSpec(
         name="owid_childmort", kaggle_ref="child-mortality|child_mortality_rate",
-        kaggle_kind="owid", files=(), time_col="year", target_col="y", task="mse"),
+        kaggle_kind="owid", files=(), time_col="year", target_col="y", task="mse",
+        log_target=True),   # mortality declines exponentially -> log ~linear in year
     "gassensor": RealDatasetSpec(
         name="gassensor",
         kaggle_ref="https://archive.ics.uci.edu/static/public/224/gas+sensor+array+drift+dataset.zip",
@@ -110,8 +112,10 @@ def frame_to_bench(df: pd.DataFrame, spec: RealDatasetSpec, seed: int,
         t_raw = pd.to_datetime(time_series).astype("int64").to_numpy(dtype=np.float64)
     t = (t_raw - t_raw.min()) / max(t_raw.max() - t_raw.min(), 1.0)
 
-    out = {"t": t, "e_0": np.ones(len(df)), "e_1": t,
-           "y": df[spec.target_col].to_numpy(dtype=np.float64)}
+    y_raw = df[spec.target_col].to_numpy(dtype=np.float64)
+    if spec.log_target:
+        y_raw = np.log1p(np.clip(y_raw, 0.0, None))
+    out = {"t": t, "e_0": np.ones(len(df)), "e_1": t, "y": y_raw}
     partition_cols = []
     for col in df.columns:
         if col in (spec.time_col, spec.target_col) or col in spec.drop_cols:

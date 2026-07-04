@@ -39,3 +39,10 @@ def test_quick_realdata_basis(tmp_path: Path):
     import json
     meta = json.loads((out / "run_meta.json").read_text())
     assert "discovered" in meta
+
+
+def test_quick_hunt_writes_screen(tmp_path: Path):
+    if not _cached_real_names():
+        pytest.skip("no real-data caches present")
+    out = run_suite("hunt", tmp_path, seeds=1, quick=True)
+    assert (out / "screen.csv").exists()
