@@ -116,3 +116,21 @@ def test_parse_gas_batch():
     assert rows[0]["gas"] == 1 and rows[0]["batch"] == 3
     assert rows[0]["s1"] == 0.5 and rows[0]["s2"] == -0.25
     assert "s0" not in rows[1]  # concentration token dropped
+
+
+def test_panel_frame_withholds_country_and_adds_lag():
+    import pandas as pd
+    from extra_boost_py.experiments.realdata import _worldbank_frame
+    values = pd.DataFrame({
+        "iso3": ["BRA", "BRA", "BRA", "IND", "IND", "IND"],
+        "year": [2000, 2001, 2002, 2000, 2001, 2002],
+        "value": [40.0, 38.0, 36.0, 80.0, 78.0, 75.0],
+    })
+    meta = pd.DataFrame({"iso3": ["BRA", "IND"], "region": ["LAC", "SAS"],
+                         "income": ["UMC", "LMC"]})
+    frame = _worldbank_frame(values, meta)
+    assert "iso3" not in frame.columns and "country" not in frame.columns
+    assert {"region", "income", "init_value", "year", "y"} <= set(frame.columns)
+    bra = frame[(frame["region"] == frame["region"].iloc[0])].sort_values("year")
+    assert bra["init_value"].nunique() == 1                 # initial level per country
+    assert float(bra["init_value"].iloc[0]) == 40.0

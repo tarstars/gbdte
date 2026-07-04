@@ -41,6 +41,9 @@ REAL_DATASETS = {
         kaggle_kind="competition", files=("train.csv.zip",),
         time_col="timestamp", target_col="price_doc", task="mse",
         drop_cols=("id",)),   # monotone row index = pseudo-time, drift score 1.0
+    "owid_childmort": RealDatasetSpec(
+        name="owid_childmort", kaggle_ref="child-mortality|child_mortality_rate",
+        kaggle_kind="owid", files=(), time_col="year", target_col="y", task="mse"),
     "gassensor": RealDatasetSpec(
         name="gassensor",
         kaggle_ref="https://archive.ics.uci.edu/static/public/224/gas+sensor+array+drift+dataset.zip",
@@ -149,6 +152,53 @@ def _parse_gas_batch(path, batch_idx: int) -> list:
     return rows
 
 
+def _worldbank_frame(values: pd.DataFrame, meta: pd.DataFrame) -> pd.DataFrame:
+    """Country-year panel with country identity WITHHELD (group must be inferred from
+    region/income/initial-level). y = indicator value; init_value = per-country value at
+    its earliest available year."""
+    values = values.dropna(subset=["value"]).sort_values(["iso3", "year"])
+    init = values.groupby("iso3")["value"].first().rename("init_value")
+    df = values.merge(init, on="iso3").merge(meta, on="iso3", how="left")
+    df["y"] = df["value"].to_numpy(dtype=np.float64)
+    df["region"] = df["region"].astype("category").cat.codes.astype(float)
+    df["income"] = df["income"].astype("category").cat.codes.astype(float)
+    return df[["region", "income", "init_value", "year", "y"]].reset_index(drop=True)
+
+
+_OWID_CONTINENTS = ("https://ourworldindata.org/grapher/"
+                    "continents-according-to-our-world-in-data.csv?csvType=full")
+
+
+def _owid_csv(url: str) -> pd.DataFrame:
+    import io
+    import urllib.request
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(url, timeout=90) as r:
+                return pd.read_csv(io.BytesIO(r.read()))
+        except Exception:
+            if attempt == 2:
+                raise
+    raise RuntimeError("unreachable")
+
+
+def _fetch_owid(spec: RealDatasetSpec) -> pd.DataFrame:
+    """Country-year panel from Our World in Data. Country identity is withheld; the group
+    must be inferred from continent (region) + initial indicator level."""
+    slug, value_col = spec.kaggle_ref.split("|")
+    ind = _owid_csv(f"https://ourworldindata.org/grapher/{slug}.csv"
+                    f"?csvType=full&useColumnShortNames=true")
+    cont = _owid_csv(_OWID_CONTINENTS)
+    cont = cont.rename(columns={cont.columns[-1]: "region"})[["Code", "region"]]
+    values = ind.rename(columns={"code": "iso3", value_col: "value"})
+    values = values[values["iso3"].notna() & (values["iso3"] != "")]
+    values = values[["iso3", "year", "value"]]
+    meta = cont.rename(columns={"Code": "iso3"}).drop_duplicates("iso3")
+    meta["income"] = "NA"                       # placeholder; region + init_value carry it
+    values = values[values["iso3"].isin(meta["iso3"])]
+    return _worldbank_frame(values, meta)
+
+
 def _download(spec: RealDatasetSpec, cache_dir: Path) -> Path:
     raw = cache_dir / spec.name / "raw"
     raw.mkdir(parents=True, exist_ok=True)
@@ -160,8 +210,8 @@ def _download(spec: RealDatasetSpec, cache_dir: Path) -> Path:
                             spec.kaggle_ref], check=True)
             subprocess.run(["unzip", "-o", "-q", str(zip_path), "-d", str(raw)], check=True)
         return raw
-    if spec.kaggle_kind == "worldbank":
-        return raw   # API fetched in _read_raw
+    if spec.kaggle_kind == "owid":
+        return raw   # fetched in _read_raw
     if spec.kaggle_kind == "mendeley":
         for f in spec.files:
             target = raw / f
@@ -204,6 +254,8 @@ def _read_raw(spec: RealDatasetSpec, raw: Path) -> pd.DataFrame:
         card = pd.read_csv(raw / "customer_data.csv")
         tx = pd.read_csv(raw / "transactions_data.csv")
         return _latam_frame(card, tx)
+    if spec.kaggle_kind == "owid":
+        return _fetch_owid(spec)
     if spec.name == "gassensor":
         import glob
         dat_files = sorted(glob.glob(str(raw / "**" / "batch*.dat"), recursive=True))
