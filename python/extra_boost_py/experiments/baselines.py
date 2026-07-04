@@ -237,5 +237,84 @@ def make_models(task: str, include_oracle: bool = True) -> Dict[str, Model]:
     return {m.name: m for m in models}
 
 
+class RidgeModel(_SKStyleModel):
+    """Ridge/logistic on standardized partition features + t. Preempts 'the whole thing
+    is just linear / a global time trend'. A linear model without per-group interactions
+    structurally cannot do per-group slopes -- which is exactly what GBDTE must beat it
+    on. Predicts value (mse) or logit (logloss)."""
+    name = "linear"
+
+    def param_grid(self) -> dict:
+        return {"alpha": [0.1, 1.0, 10.0]}
+
+    def _fit_impl(self, X, y, task, p):
+        from sklearn.linear_model import LogisticRegression, Ridge
+        from sklearn.preprocessing import StandardScaler
+        self._scaler = StandardScaler().fit(X)
+        Xs = self._scaler.transform(X)
+        if task == "mse":
+            self._m = Ridge(alpha=p.get("alpha", 1.0)).fit(Xs, y)
+        else:
+            self._m = LogisticRegression(C=1.0 / p.get("alpha", 1.0),
+                                         max_iter=1000).fit(Xs, y)
+        self._task = task
+
+    def _predict_impl(self, X):
+        Xs = self._scaler.transform(X)
+        if self._task == "mse":
+            return self._m.predict(Xs)
+        return self._m.decision_function(Xs)
+
+
+class DetrendLGBM(_SKStyleModel):
+    """Global linear-in-t detrend, then LightGBM on the residual. Preempts 'just detrend
+    then boost'. (mse only; for logloss it degrades to plain lgbm.)"""
+    name = "detrend_lgbm"
+
+    def available(self) -> bool:
+        try:
+            import lightgbm  # noqa: F401
+            return True
+        except ImportError:
+            return False
+
+    def param_grid(self) -> dict:
+        return {"n_estimators": [50, 100, 200], "max_depth": [3, 5, 7]}
+
+    def _cols(self, bench: Bench) -> List[str]:
+        self._t_idx = len(bench.partition_cols)   # t appended last by _SKStyleModel._cols
+        return bench.partition_cols + ["t"]
+
+    def _fit_impl(self, X, y, task, p):
+        import lightgbm as lgb
+        self._task = task
+        t = X[:, self._t_idx]
+        if task == "mse":
+            self._trend = np.polyfit(t, y, 1)
+            resid = y - np.polyval(self._trend, t)
+            self._m = lgb.LGBMRegressor(verbose=-1, n_estimators=p.get("n_estimators", 100),
+                                        max_depth=p.get("max_depth", 5)).fit(X, resid)
+        else:
+            self._trend = None
+            self._m = lgb.LGBMClassifier(verbose=-1, n_estimators=p.get("n_estimators", 100),
+                                         max_depth=p.get("max_depth", 5)).fit(X, y)
+
+    def _predict_impl(self, X):
+        if self._task == "mse":
+            return np.polyval(self._trend, X[:, self._t_idx]) + self._m.predict(X)
+        return self._m.predict_proba(X, raw_score=True)
+
+
+def make_real_models(task: str) -> Dict[str, Model]:
+    """The real-data model set: the 7 boosters/wrappers + two anti-strawman baselines."""
+    base = make_models(task, include_oracle=False)
+    keep = ["gbdte", "gbdte_auto", "gbdte_const", "lgbm", "lgbm_linear", "xgb", "catboost"]
+    models: Dict[str, Model] = {k: base[k] for k in keep if k in base}
+    for m in (RidgeModel(), DetrendLGBM()):
+        models[m.name] = m
+    return models
+
+
 __all__ = ["Model", "GBDTEModel", "LightGBMModel", "XGBoostModel", "CatBoostModel",
-           "OracleModel", "GroupLinearModel", "make_models"]
+           "OracleModel", "GroupLinearModel", "RidgeModel", "DetrendLGBM",
+           "make_models", "make_real_models"]
