@@ -49,7 +49,7 @@ def _basis_matrix(t: np.ndarray, freqs: Tuple[float, ...]) -> np.ndarray:
     return np.column_stack(cols)
 
 
-def discover_basis(bench: Bench, max_freqs: int = 3, n_bins: int = 200,
+def discover_basis(bench: Bench, max_freqs: int = 3, n_bins: int = 1600,
                    min_power_ratio: float = 4.0) -> DiscoveredBasis:
     tb, yb = _aggregate_curve(bench, n_bins)
     if len(tb) < 16:
@@ -57,7 +57,7 @@ def discover_basis(bench: Bench, max_freqs: int = 3, n_bins: int = 200,
     resid = _detrend(tb, yb)
     span = tb.max() - tb.min()
     f_lo, f_hi = 2.0 / span, n_bins / (4.0 * span)
-    f_grid = np.linspace(f_lo, f_hi, 2000)
+    f_grid = np.linspace(f_lo, f_hi, 4000)
     power = lombscargle(tb, resid, 2.0 * np.pi * f_grid, normalize=False)
 
     # significance floor: max periodogram power of permuted residuals (destroys any
@@ -71,14 +71,15 @@ def discover_basis(bench: Bench, max_freqs: int = 3, n_bins: int = 200,
     floor = max(1.1 * perm_max, min_power_ratio * float(np.median(power)))
     freqs = []
     p = power.copy()
-    min_sep = 2
     for _ in range(max_freqs):
         i = int(np.argmax(p))
         if p[i] <= floor:
             break
-        freqs.append(float(f_grid[i]))
-        lo, hi = max(0, i - min_sep), min(len(p), i + min_sep + 1)
-        p[lo:hi] = 0.0
+        f_peak = float(f_grid[i])
+        freqs.append(f_peak)
+        # suppress the whole broad peak: proportional exclusion zone (+-15%)
+        zone = (f_grid > 0.85 * f_peak) & (f_grid < 1.15 * f_peak)
+        p[zone] = 0.0
 
     freqs_t = tuple(sorted(freqs))
     A = _basis_matrix(tb, freqs_t)
