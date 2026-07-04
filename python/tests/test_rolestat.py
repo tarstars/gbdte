@@ -30,3 +30,25 @@ def test_auto_roles_recovers_design():
     part, leaf = auto_roles(b)
     assert "t" in leaf
     assert {"f_0", "f_1", "f_2"} <= set(part)
+
+
+def test_separability_sees_categorical_group():
+    import pandas as pd
+    from extra_boost_py.experiments.benchgen import Bench
+    rng = np.random.default_rng(0)
+    n = 6000
+    g = rng.integers(0, 10, n)                 # 10-way categorical (not binary)
+    t = rng.random(n)
+    y = g.astype(float) + 0.3 * rng.standard_normal(n)   # stable group->y map over time
+    df = pd.DataFrame({"g": g.astype(float), "t": t, "e_0": np.ones(n), "e_1": t, "y": y})
+    b = Bench(df=df, partition_cols=["g"], extra_cols=["e_0", "e_1"], task="mse", cut=0.5)
+    assert separability_index(b) > 0.5          # old binary-only code returned 0.0
+
+
+def test_separability_still_monotone_in_rho():
+    from dataclasses import replace
+    from extra_boost_py.experiments.benchgen import PRESETS, generate
+    base = PRESETS["regime_base"]
+    vals = [float(np.mean([separability_index(generate(replace(base, rho=r, seed=s)))
+                           for s in range(3)])) for r in (0.0, 0.5, 1.0)]
+    assert vals[0] < vals[1] < vals[2]

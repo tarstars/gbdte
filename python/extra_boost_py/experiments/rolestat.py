@@ -4,6 +4,8 @@ from __future__ import annotations
 from typing import List, Tuple
 
 import numpy as np
+import pandas as pd
+from scipy.stats import spearmanr
 from sklearn.metrics import roc_auc_score
 
 from .benchgen import Bench
@@ -35,15 +37,45 @@ def stability_score(x: np.ndarray, y: np.ndarray, t: np.ndarray) -> float:
     return float(min(abs(c1), abs(c2)))
 
 
-def separability_index(bench: Bench) -> float:
-    """Mean stability of binary partition candidates; tracks role purity (rho)."""
+def _binned_stability(x: np.ndarray, y: np.ndarray, t: np.ndarray, n_bins: int = 10) -> float:
+    """Stability of the x->y relation across time halves, for x of any cardinality.
+    Bin x into <=n_bins quantile groups, compare per-bin mean-y between the early and
+    late time halves via Spearman rank correlation (0 if too few bins)."""
+    med = np.median(t)
+    early, late = t <= med, t > med
+    if early.sum() < 2 or late.sum() < 2:
+        return 0.0
+    uniq = np.unique(x)
+    if uniq.size <= n_bins:
+        bins = x
+    else:
+        edges = np.quantile(x, np.linspace(0, 1, n_bins + 1)[1:-1])
+        bins = np.digitize(x, edges)
+    ea = pd.Series(y[early]).groupby(pd.Series(bins[early])).mean()
+    la = pd.Series(y[late]).groupby(pd.Series(bins[late])).mean()
+    common = ea.index.intersection(la.index)
+    if len(common) < 3:
+        return 0.0
+    rho, _ = spearmanr(ea.loc[common].to_numpy(), la.loc[common].to_numpy())
+    return float(max(rho, 0.0)) if np.isfinite(rho) else 0.0
+
+
+def separability_index(bench: Bench, max_card: int = 10) -> float:
+    """Mean cross-time stability of the target's dependence on CATEGORICAL partition
+    features (cardinality <= max_card). Generalizes the old binary-only version to
+    multi-way categoricals (region, income, class id) while keeping the validated
+    discrete-group meaning and scale. Genuinely continuous group structure is caught by
+    extrapolation_gain instead (a tree forms the groups there)."""
     df = bench.df
     y, t = df["y"].to_numpy(), df["t"].to_numpy()
     scores = []
-    for col in bench.partition_cols:
-        x = df[col].to_numpy()
-        if np.unique(x).size <= 2:  # binary candidates only
-            scores.append(stability_score(x, y, t))
+    for c in bench.partition_cols:
+        x = df[c].to_numpy()
+        card = np.unique(x).size
+        if card == 2:
+            scores.append(stability_score(x, y, t))    # correlation-based (validated)
+        elif card <= max_card:
+            scores.append(_binned_stability(x, y, t))  # Spearman of per-bin means
     return float(np.mean(scores)) if scores else 0.0
 
 
