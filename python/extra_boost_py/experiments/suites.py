@@ -18,6 +18,7 @@ from .benchgen import Bench, PRESETS, generate
 from .classical_bench import classical_bench
 from .poisson_baselines import make_poisson_models
 from .poisson_bench import POISSON_PRESETS, generate_poisson
+from .basisdisc import apply_basis, discover_basis
 from .realdata import REAL_DATASETS, load_real
 from .rolestat import separability_index
 from .stats import cd_diagram, friedman_nemenyi, run_grid, summary_table
@@ -243,11 +244,56 @@ def suite_realdata(out: Path, seeds: int, quick: bool) -> None:
         plt.close(fig)
 
 
+def suite_realdata_basis(out: Path, seeds: int, quick: bool) -> None:
+    """realdata with a per-seed DISCOVERED Fourier+trend basis given to all models."""
+    import os
+    cached = _cached_real_names()
+    only = os.environ.get("GBDTE_REALDATA_ONLY")
+    if only:
+        cached = [n for n in cached if n in only.split(",")]
+    if not cached:
+        raise RuntimeError("no real-data caches under datasets/realdata/")
+    names = cached[:1] if quick else cached
+    n_max = 2000 if quick else 20000
+    wanted = ["gbdte", "gbdte_auto", "gbdte_const", "lgbm", "lgbm_linear",
+              "xgb", "catboost"]
+    sep_rows, all_results, discovered = [], [], {}
+    for name in names:
+        task = REAL_DATASETS[name].task
+        all_models = make_models(task, include_oracle=False)
+        models = {k: v for k, v in all_models.items() if k in wanted}
+
+        def factory(bname: str, seed: int) -> Bench:
+            bench = load_real(bname, seed=seed, n_max=n_max)
+            basis = discover_basis(bench)
+            discovered[f"{bname}/seed{seed}"] = {
+                "freqs": list(basis.freqs), "r2_train": basis.r2_train}
+            bench = apply_basis(bench, basis)
+            sep_rows.append(dict(bench=bname, seed=seed,
+                                 separability=separability_index(bench),
+                                 basis_r2=basis.r2_train,
+                                 n_freqs=len(basis.freqs)))
+            return bench
+
+        res = run_grid(models, None, _seeds(seeds), bench_factory=factory,
+                       bench_names=[name], tune_trials=2 if quick else 8)
+        all_results.append(res)
+
+    results = pd.concat(all_results, ignore_index=True)
+    hib = {"rmse": False, "auc": True, "logloss": False}
+    _write_report(out, results, {"suite": "realdata_basis", "git": _git_sha(),
+                                 "seeds": seeds, "n_max": n_max, "datasets": names,
+                                 "discovered": discovered}, hib)
+    pd.DataFrame(sep_rows).drop_duplicates(["bench", "seed"]).to_csv(
+        out / "separability.csv", index=False)
+
+
 SUITES = {
     "baselines_mse": suite_baselines_mse,
     "baselines_logloss": suite_baselines_logloss,
     "baselines_poisson": suite_baselines_poisson,
     "realdata": suite_realdata,
+    "realdata_basis": suite_realdata_basis,
     "regime_map": suite_regime_map,
     "rolestat_validation": suite_rolestat_validation,
     "auto_roles": suite_auto_roles,
