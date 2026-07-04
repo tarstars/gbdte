@@ -79,23 +79,24 @@ Build the shared library first if you haven't:
 main engine; the Poisson legacy library builds via
 `scripts/run_smoke_tests.py` or `build_poisson_legacy_shared()` from the same module.
 
-## Known limitations (validated 2026-07-02)
+## Status and limitations
 
-These are pinned by `python/tests/test_poisson_semantics.py`; the multi-stage item is a
-strict `xfail` that will flip when fixed.
+Behaviour is pinned by `python/tests/test_poisson_semantics.py`.
 
-1. **Use `n_stages=1` in extra mode.** The first tree fits leaf intensities exactly
-   (per-leaf least squares of counts on the basis; `learning_rate` is ignored for it).
-   Every *additional* stage adds a systematic offset: the Newton update of later stages
-   evaluates its exposure term in rate units while the first tree fits count units — a
-   unit mismatch, i.e. an engine bug. Until it is fixed, depth is the capacity knob.
+1. **Multi-stage boosting: FIXED (2026-07-04).** Earlier only `n_stages=1` was usable —
+   every later stage added a systematic offset because the Newton exposure term used
+   `N_L·psi` (per-object integral of phi) instead of the per-row running sum `sum_i phi_i`,
+   a bin-width factor too small. The engine now uses the per-row exposure; multi-stage
+   converges to the true intensity (test checks `n_stages` in {2, 5}). Analysis:
+   [`poisson_mode_explained.pdf`](poisson_mode_explained.pdf) §4–5.
 2. **Zero counts crash the process** (an abort inside the CGO layer, not a Python
    exception). Aggregate to coarser bins or larger cohorts so counts stay ≥ 1.
-3. **No positivity guard on leaf intensities.** A fitted linear $\lambda(t)$ can cross
-   zero when extrapolated far beyond the training window; clip predictions and treat
-   near-zero predictions with suspicion.
-4. Fix directions for (1) are analyzed in
-   [`poisson_mode_explained.pdf`](poisson_mode_explained.pdf), §5.
+3. **Leaf-intensity stability across depth (open).** The additive linear leaf can dip
+   toward zero and inflate the Poisson deviance, so results are sensitive to tree depth;
+   the experiment wrapper applies an intensity floor (1% of the mean count) as a partial
+   mitigation. A positivity-constrained leaf solve in the engine is the proper fix
+   (future work). At a stable shallow depth, GBDTE-Poisson is competitive with LightGBM
+   on the synthetic benchmark.
 
 ## Benchmark and experiments
 

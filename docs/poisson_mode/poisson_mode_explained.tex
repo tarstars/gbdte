@@ -170,9 +170,16 @@ correct derivative structure for Eq.~\eqref{eq:pp-loglik}: the exposure term
 contributes $N_L \psi$ (each object integrates the correction over the whole window),
 the event term contributes $\sum y\varphi/b$.
 
-\section{The inconsistency, precisely}
+\section{The inconsistency, precisely (fixed 2026-07-04)}
 \label{sec:bug}
 
+\noindent\fbox{\parbox{\linewidth}{\small \textbf{Resolved.} The defect described in this
+section was fixed on 2026-07-04 by adopting Fix~1 below: the Newton exposure term now uses
+the per-row running sum $\sum_i\varphi_i$ instead of $N_L\psi$. Multi-stage boosting now
+converges to the true intensity; \code{test\_extra\_mode\_multi\_stage\_is\_consistent}
+passes for \code{n\_stages} in $\{2,5\}$. The analysis below is kept for the record.}}
+
+\medskip
 Equations \eqref{eq:first-tree} and \eqref{eq:newton} do not speak the same units.
 
 \begin{itemize}
@@ -193,10 +200,11 @@ The observed behavior follows: with \code{n\_stages=1} the recovery of a known t
 linear intensity is exact (to sampling noise); with \code{n\_stages=2} every prediction
 shifts by a systematic offset; with many stages the iteration settles at a fixed point
 that is \emph{not} the maximizer of the engine's own likelihood (verified by solving the
-MLE independently). The strict-\code{xfail} test
-\code{test\_extra\_mode\_multi\_stage\_is\_consistent} pins this defect.
+MLE independently). This defect was pinned by
+\code{test\_extra\_mode\_multi\_stage\_is\_consistent} (formerly a strict \code{xfail},
+now a passing test).
 
-\paragraph{Fix directions (to be designed before coding).}
+\paragraph{Fix directions.} Fix~1 was implemented.
 \begin{enumerate}
 \item \textbf{Make everything per-row Poisson regression on binned counts.} Replace the
       per-object exposure $N_L\psi$ with a per-row exposure $\varphi(t_i)\Delta_i$
