@@ -7,9 +7,10 @@ Validated semantics (2026-07-02):
 - `features_extra` = phi(t) at bin centers, `psi` = integral of phi over the full
   observation window;
 - `predict` returns the expected per-bin count, i.e. lambda(t) in freq units;
-- ONLY n_stages=1 is usable in extra mode: the first tree fits leaf intensities exactly
-  (learning_rate is ignored for it), while every additional stage adds a systematic
-  offset (bias mis-propagation bug in wholeLossNextTreeExtra) — see xfail test below.
+- multi-stage extra-mode boosting is consistent (fixed 2026-07-04): the Newton exposure
+  term in wholeLossNextTreeExtra now uses the per-row running sum of phi instead of
+  N_L * psi, which was a bin-width factor too small and shifted every stage after the
+  first. See docs/poisson_mode/poisson_mode_explained.pdf.
 """
 import numpy as np
 import pytest
@@ -70,14 +71,14 @@ def test_extra_mode_single_stage_recovers_linear_intensity():
         assert np.allclose(rates, lam_fn(probe_t), rtol=0.06), (rates, lam_fn(probe_t))
 
 
-@pytest.mark.xfail(reason="engine bug: each extra-mode stage beyond the first adds a "
-                          "systematic offset (bias mis-propagation); fix in Go before "
-                          "using n_stages > 1", strict=True)
 def test_extra_mode_multi_stage_is_consistent():
+    """Fixed 2026-07-04: per-row exposure (sum phi) instead of N_L*psi. Multiple boosting
+    stages now stay at the true intensity instead of accumulating a systematic offset."""
     rng = np.random.default_rng(0)
     arr, delta, exposure = _binned_two_group_data(rng)
-    booster = _train(arr, n_stages=2)
-    probe_t = np.array([0.1, 0.9])
-    fe = np.column_stack([np.ones(2), probe_t])
-    preds = booster.predict(np.zeros((2, 1)), fe) / (exposure * delta)
-    assert np.allclose(preds, 2.0 + 2.0 * probe_t, rtol=0.06)
+    for n_stages in (2, 5):
+        booster = _train(arr, n_stages=n_stages)
+        probe_t = np.array([0.1, 0.9])
+        fe = np.column_stack([np.ones(2), probe_t])
+        preds = booster.predict(np.zeros((2, 1)), fe) / (exposure * delta)
+        assert np.allclose(preds, 2.0 + 2.0 * probe_t, rtol=0.06), (n_stages, preds)

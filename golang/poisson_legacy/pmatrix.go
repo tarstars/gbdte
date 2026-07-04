@@ -472,21 +472,13 @@ func (p *PMatrix) wholeLossNextTreeExtra(params TreeBuildParams, bias []float64)
 	freqRect := gatherVectorByGax(p.Freqs, p.Gax)
 	biasRect := gatherVectorByGax(bias, p.Gax)
 
-	objectsForward := countObjects(p.Bjids, p.Gax)
-	revGax := reverseGax(p.Gax)
-	objectsBackward := countObjects(p.Bjids, revGax)
-	objectsBackward = reverse2DFloat(objectsBackward)
-
-	psiForward := make3D(rows, cols, depth)
-	psiBackward := make3D(rows, cols, depth)
-	for i := 0; i < rows; i++ {
-		for j := 0; j < cols; j++ {
-			for d := 0; d < depth; d++ {
-				psiForward[i][j][d] = objectsForward[i][j] * p.Psi[d]
-				psiBackward[i][j][d] = objectsBackward[i][j] * p.Psi[d]
-			}
-		}
-	}
+	// Exposure term of the Poisson gradient. For binned-count data the per-row
+	// exposure is the running sum of phi (sum_i phi_i), NOT the per-object integral
+	// N_L * psi = N_L * integral(phi). The latter is a factor of the bin width too
+	// small, which made every boosting stage after the first add a systematic offset
+	// (see docs/poisson_mode/poisson_mode_explained.pdf and test_poisson_semantics).
+	psiForward := cumsumForward3D(featuresExtraRect)
+	psiBackward := cumsumBackward3D(featuresExtraRect)
 
 	hess := make4D(rows, cols, depth)
 	for i := 0; i < rows; i++ {

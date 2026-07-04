@@ -24,8 +24,9 @@ class GBDTEPoissonModel(Model):
         self._booster = None
 
     def param_grid(self) -> dict:
-        # single stage only (engine constraint); depth is the capacity knob
-        return {"max_depth": [2, 3, 5, 7]}
+        # multi-stage boosting fixed 2026-07-04 (per-row exposure); tune stages + depth
+        return {"n_stages": [1, 8, 24], "max_depth": [3, 5, 7],
+                "learning_rate": [0.1, 0.3]}
 
     def _inter_cols(self, bench: PoissonBench) -> List[str]:
         if self.roles == "wrong":
@@ -37,6 +38,7 @@ class GBDTEPoissonModel(Model):
         self._cols = self._inter_cols(bench)
         self._use_extra = self.roles != "const"
         self._extra_cols = bench.extra_cols
+        self._floor = 0.01 * float(bench.train["y"].mean())   # intensity positivity floor
         bjids, freqs, _, f_extra, psi = bench.event_train()
         f_inter = _xy(bench.train, self._cols)
         kwargs = {}
@@ -45,8 +47,8 @@ class GBDTEPoissonModel(Model):
         self._booster = PoissonLegacyBooster.train(
             bjids=bjids, freqs=freqs, features_inter=f_inter,
             params=PoissonLegacyParams(
-                n_stages=1, max_depth=p.get("max_depth", 5),
-                learning_rate=1.0, reg_lambda=1e-6),
+                n_stages=p.get("n_stages", 8), max_depth=p.get("max_depth", 5),
+                learning_rate=p.get("learning_rate", 0.3), reg_lambda=1e-6),
             **kwargs)
 
     def predict(self, df: pd.DataFrame) -> np.ndarray:
@@ -55,7 +57,9 @@ class GBDTEPoissonModel(Model):
             preds = self._booster.predict(f_inter, _xy(df, self._extra_cols))
         else:
             preds = self._booster.predict(f_inter)
-        return np.clip(preds, 0.0, None)  # already per-bin expected counts
+        # per-bin expected counts; floor keeps the Poisson intensity strictly positive
+        # (an additive linear leaf can dip toward zero and blow up the deviance)
+        return np.clip(preds, self._floor, None)
 
 
 class _SKPoisson(Model):
