@@ -46,6 +46,18 @@ REAL_DATASETS = {
         name="owid_childmort", kaggle_ref="child-mortality|child_mortality_rate",
         kaggle_kind="owid", files=(), time_col="year", target_col="y", task="mse",
         log_target=True),   # mortality declines exponentially -> log ~linear in year
+    "owid_maternalmort": RealDatasetSpec(
+        name="owid_maternalmort", kaggle_ref="maternal-mortality|mmr",
+        kaggle_kind="owid", files=(), time_col="year", target_col="y", task="mse",
+        log_target=True),
+    "owid_lifeexp": RealDatasetSpec(
+        name="owid_lifeexp", kaggle_ref="life-expectancy|life_expectancy_0",
+        kaggle_kind="owid", files=(), time_col="year", target_col="y", task="mse",
+        log_target=False),  # bounded, ~linear in year -> no log
+    "owid_gdppcap": RealDatasetSpec(
+        name="owid_gdppcap", kaggle_ref="gdp-per-capita-worldbank|ny_gdp_pcap_pp_kd",
+        kaggle_kind="owid", files=(), time_col="year", target_col="y", task="mse",
+        log_target=True),   # GDP grows ~exponentially
     "gassensor": RealDatasetSpec(
         name="gassensor",
         kaggle_ref="https://archive.ics.uci.edu/static/public/224/gas+sensor+array+drift+dataset.zip",
@@ -175,14 +187,18 @@ _OWID_CONTINENTS = ("https://ourworldindata.org/grapher/"
 
 def _owid_csv(url: str) -> pd.DataFrame:
     import io
+    import time
     import urllib.request
-    for attempt in range(3):
+    # OWID blocks the default python-urllib user-agent (403); present a browser one.
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (gbdte-research)"})
+    for attempt in range(4):
         try:
-            with urllib.request.urlopen(url, timeout=90) as r:
+            with urllib.request.urlopen(req, timeout=90) as r:
                 return pd.read_csv(io.BytesIO(r.read()))
         except Exception:
-            if attempt == 2:
+            if attempt == 3:
                 raise
+            time.sleep(2 * (attempt + 1))
     raise RuntimeError("unreachable")
 
 
