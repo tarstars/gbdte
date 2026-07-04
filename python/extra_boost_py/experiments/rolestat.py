@@ -102,4 +102,58 @@ def auto_roles(bench: Bench, drift_threshold: float = 0.6,
     return partition, leaf
 
 
-__all__ = ["drift_score", "stability_score", "separability_index", "auto_roles"]
+def extrapolation_gain(bench: Bench, max_depth: int = 4) -> float:
+    """Cheap screen for leaf-linear forward headroom: discover groups with a shallow
+    tree on partition features (no time), then measure how much a per-group linear-in-t
+    model beats a per-group constant on an inner-FORWARD slice of the train window.
+    Relative improvement in the task metric; ~0 means no dataset trick will help."""
+    from sklearn.metrics import log_loss
+    from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+
+    tr = bench.train
+    if len(tr) < 200:
+        return 0.0
+    X = tr[bench.partition_cols].to_numpy(dtype=np.float64)
+    y = tr["y"].to_numpy(dtype=np.float64)
+    t = tr["t"].to_numpy(dtype=np.float64)
+    q = np.quantile(t, 0.75)
+    inner, fwd = t < q, t >= q
+    if inner.sum() < 50 or fwd.sum() < 20:
+        return 0.0
+
+    Tree = DecisionTreeClassifier if bench.task == "logloss" else DecisionTreeRegressor
+    tree = Tree(max_depth=max_depth, min_samples_leaf=50, random_state=0)
+    tree.fit(X[inner], y[inner])
+    leaf_all = tree.apply(X)
+    lf_inner, lf_fwd = leaf_all[inner], leaf_all[fwd]
+
+    def _fit_predict(linear: bool) -> np.ndarray:
+        preds = np.empty(int(fwd.sum()))
+        yf, tf = y[inner], t[inner]
+        te = t[fwd]
+        for lf in np.unique(lf_fwd):
+            sel_fit = lf_inner == lf
+            sel_eval = lf_fwd == lf
+            if sel_fit.sum() >= 10 and linear:
+                A = np.column_stack([np.ones(int(sel_fit.sum())), tf[sel_fit]])
+                coef, *_ = np.linalg.lstsq(A, yf[sel_fit], rcond=None)
+                p = np.column_stack([np.ones(int(sel_eval.sum())), te[sel_eval]]) @ coef
+            else:
+                p = np.full(int(sel_eval.sum()),
+                            yf[sel_fit].mean() if sel_fit.any() else yf.mean())
+            preds[np.where(sel_eval)[0]] = p
+        return preds
+
+    const_p, lin_p = _fit_predict(False), _fit_predict(True)
+    yv = y[fwd]
+    if bench.task == "logloss":
+        c = log_loss(yv, np.clip(1 / (1 + np.exp(-const_p)), 1e-6, 1 - 1e-6), labels=[0, 1])
+        l = log_loss(yv, np.clip(1 / (1 + np.exp(-lin_p)), 1e-6, 1 - 1e-6), labels=[0, 1])
+    else:
+        c = float(np.mean((yv - const_p) ** 2))
+        l = float(np.mean((yv - lin_p) ** 2))
+    return float(max((c - l) / c, 0.0)) if c > 0 else 0.0
+
+
+__all__ = ["drift_score", "stability_score", "separability_index",
+           "extrapolation_gain", "auto_roles"]
