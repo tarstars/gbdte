@@ -41,6 +41,13 @@ REAL_DATASETS = {
         kaggle_kind="competition", files=("train.csv.zip",),
         time_col="timestamp", target_col="price_doc", task="mse",
         drop_cols=("id",)),   # monotone row index = pseudo-time, drift score 1.0
+    "latam": RealDatasetSpec(
+        name="latam",
+        kaggle_ref="mendeley:mhb4zn3258",   # public direct download, not kaggle
+        kaggle_kind="mendeley",
+        files=("customer_data.csv", "transactions_data.csv"),
+        time_col="month", target_col="y_log_count", task="mse",
+        drop_cols=("customer_id",)),
     "homecredit": RealDatasetSpec(
         name="homecredit", kaggle_ref="home-credit-credit-risk-model-stability",
         kaggle_kind="competition",
@@ -50,6 +57,35 @@ REAL_DATASETS = {
                "csv_files/train/train_static_cb_0.csv"),
         time_col="date_decision", target_col="target", task="logloss"),
 }
+
+
+_LATAM_STATIC_COLS = (
+    "age", "gender", "location", "income_bracket", "occupation", "education_level",
+    "marital_status", "household_size", "acquisition_channel", "customer_segment",
+    "savings_account", "credit_card", "personal_loan", "investment_account",
+    "insurance_product", "active_products",
+)   # everything else in the card is a whole-2023 aggregate -> temporal leakage
+
+
+def _latam_frame(card: pd.DataFrame, tx: pd.DataFrame) -> pd.DataFrame:
+    """Client x month grid with y = log1p(monthly transaction count).
+
+    Zero-activity months are materialized: churn shows up as trailing zeros, which is
+    exactly the drift signal the benchmark is about."""
+    months = pd.date_range("2023-01-01", periods=12, freq="MS").strftime("%Y-%m-%d")
+    tx = tx.copy()
+    tx["month"] = pd.to_datetime(tx["date"]).dt.to_period("M").dt.start_time.dt.strftime("%Y-%m-%d")
+    counts = tx.groupby(["customer_id", "month"]).size().rename("n").reset_index()
+
+    grid = pd.MultiIndex.from_product(
+        [card["customer_id"].unique(), months], names=["customer_id", "month"]
+    ).to_frame(index=False)
+    grid = grid.merge(counts, on=["customer_id", "month"], how="left")
+    grid["y_log_count"] = np.log1p(grid["n"].fillna(0.0))
+    grid = grid.drop(columns=["n"])
+
+    static = card[["customer_id", *_LATAM_STATIC_COLS]]
+    return grid.merge(static, on="customer_id", how="left")
 
 
 def frame_to_bench(df: pd.DataFrame, spec: RealDatasetSpec, seed: int,
@@ -86,6 +122,17 @@ def frame_to_bench(df: pd.DataFrame, spec: RealDatasetSpec, seed: int,
 def _download(spec: RealDatasetSpec, cache_dir: Path) -> Path:
     raw = cache_dir / spec.name / "raw"
     raw.mkdir(parents=True, exist_ok=True)
+    if spec.kaggle_kind == "mendeley":
+        for f in spec.files:
+            target = raw / f
+            if target.exists():
+                continue
+            res = subprocess.run(["curl", "-sL", "--max-time", "900",
+                                  "-o", str(target), _LATAM_URLS[f]],
+                                 capture_output=True, text=True)
+            if res.returncode != 0:
+                raise RuntimeError(f"mendeley download failed for {f}: {res.stderr}")
+        return raw
     kind = "datasets" if spec.kaggle_kind == "dataset" else "competitions"
     for f in spec.files:
         target = raw / Path(f).name
@@ -106,7 +153,17 @@ def _download(spec: RealDatasetSpec, cache_dir: Path) -> Path:
     return raw
 
 
+_LATAM_URLS = {
+    "customer_data.csv": "https://data.mendeley.com/public-files/datasets/mhb4zn3258/files/0bd16d9c-55c4-4795-8545-db6b1de1f7fc/file_downloaded",
+    "transactions_data.csv": "https://data.mendeley.com/public-files/datasets/mhb4zn3258/files/2afa7996-75b3-42ef-9c39-ed5e028d49f9/file_downloaded",
+}
+
+
 def _read_raw(spec: RealDatasetSpec, raw: Path) -> pd.DataFrame:
+    if spec.name == "latam":
+        card = pd.read_csv(raw / "customer_data.csv")
+        tx = pd.read_csv(raw / "transactions_data.csv")
+        return _latam_frame(card, tx)
     if spec.name == "weather":
         return pd.read_parquet(raw / "weather.parquet")
     if spec.name == "sberbank":

@@ -51,3 +51,41 @@ def test_seeded_subsample_differs():
 def test_registry():
     assert {"weather", "sberbank", "homecredit"} <= set(REAL_DATASETS)
     assert REAL_DATASETS["homecredit"].task == "logloss"
+
+
+def test_latam_aggregation():
+    import pandas as pd
+    from extra_boost_py.experiments.realdata import _latam_frame
+
+    card = pd.DataFrame({
+        "customer_id": [1, 2],
+        "age": [30, 40], "gender": ["M", "F"], "location": ["a", "b"],
+        "income_bracket": ["High", "Low"], "occupation": ["x", "y"],
+        "education_level": ["e1", "e2"], "marital_status": ["m", "s"],
+        "household_size": [2, 3], "acquisition_channel": ["c1", "c2"],
+        "customer_segment": ["s1", "s2"], "savings_account": [True, False],
+        "credit_card": [True, True], "personal_loan": [False, False],
+        "investment_account": [True, False], "insurance_product": [False, True],
+        "active_products": [2, 1],
+        "tx_count": [99, 99], "churn_probability": [0.5, 0.5],  # leaky: must be dropped
+    })
+    tx = pd.DataFrame({
+        "customer_id": [1, 1, 1, 2],
+        "date": ["2023-01-05", "2023-01-20", "2023-03-02", "2023-06-10"],
+        "amount": [10.0, 20.0, 30.0, 40.0],
+        "type": ["Transfer", "Payment", "Transfer", "Withdrawal"],
+    })
+    frame = _latam_frame(card, tx)
+    assert len(frame) == 2 * 12                       # full client x month grid
+    assert "tx_count" not in frame.columns            # leaky aggregate excluded
+    assert "churn_probability" not in frame.columns
+    jan1 = frame[(frame["customer_id"] == 1) & (frame["month"] == "2023-01-01")]
+    feb1 = frame[(frame["customer_id"] == 1) & (frame["month"] == "2023-02-01")]
+    assert float(jan1["y_log_count"].iloc[0]) == pytest_approx_log(2)
+    assert float(feb1["y_log_count"].iloc[0]) == 0.0  # zero month materialized
+    assert "age" in frame.columns and "customer_id" in frame.columns
+
+
+def pytest_approx_log(n):
+    import numpy as np
+    return float(np.log1p(n))

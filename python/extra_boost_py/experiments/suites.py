@@ -187,6 +187,10 @@ def suite_realdata(out: Path, seeds: int, quick: bool) -> None:
     if not cached:
         raise RuntimeError("no real-data caches under datasets/realdata/; "
                            "run load_real() for at least one dataset first")
+    import os
+    only = os.environ.get("GBDTE_REALDATA_ONLY")
+    if only:
+        cached = [n for n in cached if n in only.split(",")]
     names = cached[:1] if quick else cached
     n_max = 2000 if quick else 20000   # timing probe 2026-07-03: engine ~45s/6k rows
     wanted = ["gbdte", "gbdte_auto", "gbdte_const", "lgbm", "lgbm_linear",
