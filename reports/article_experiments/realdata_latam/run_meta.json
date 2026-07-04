@@ -1,0 +1,9 @@
+{
+  "suite": "realdata",
+  "git": "20729b3afe3153c4105261935a0f9c5e5e7be94e",
+  "seeds": 5,
+  "n_max": 20000,
+  "datasets": [
+    "latam"
+  ]
+}
