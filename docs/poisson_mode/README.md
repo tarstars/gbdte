@@ -91,12 +91,18 @@ Behaviour is pinned by `python/tests/test_poisson_semantics.py`.
    [`poisson_mode_explained.pdf`](poisson_mode_explained.pdf) §4–5.
 2. **Zero counts crash the process** (an abort inside the CGO layer, not a Python
    exception). Aggregate to coarser bins or larger cohorts so counts stay ≥ 1.
-3. **Leaf-intensity stability across depth (open).** The additive linear leaf can dip
-   toward zero and inflate the Poisson deviance, so results are sensitive to tree depth;
-   the experiment wrapper applies an intensity floor (1% of the mean count) as a partial
-   mitigation. A positivity-constrained leaf solve in the engine is the proper fix
-   (future work). At a stable shallow depth, GBDTE-Poisson is competitive with LightGBM
-   on the synthetic benchmark.
+3. **Tree-partition stability across depth (open — this is a SPLIT-criterion issue, not a
+   leaf one).** Diagnosed 2026-07-04. Under *oracle grouping* (true group as the
+   partition) every leaf model is near-optimal and identical — additive-linear, ridged,
+   floored, and a log-link Poisson GLM all give test deviance ~0.83 vs oracle 0.83. So the
+   additive linear leaf is *not* the problem. The instability comes from the greedy
+   Poisson *split*: for some seeds/depths the tree finds a partition (different from the
+   true groups) whose linear-leaf extrapolations blow up the deviance (e.g. 0.9 at depth 2
+   but 25 at depth 3 on one seed, in the single tree — not a boosting-divergence effect;
+   `unbalanced_penalty` has no effect). At a stable shallow depth GBDTE-Poisson is
+   competitive with LightGBM (beats it on 2/3 synthetic seeds). The wrapper keeps a 1%
+   intensity floor as a cheap damage cap, but the proper fix is a better Poisson split
+   criterion (engine work, future) — a leaf-level regularizer will not help.
 
 ## Benchmark and experiments
 
