@@ -146,16 +146,18 @@ fig.update_layout(title="The pre-training screen — extrap_gain, not separabili
 eda.apply_style(fig).show()''')
 code('''fam=pd.read_csv("reports/article_experiments/hunt/family_bootstrap.csv")
 order=["owid_childmort","owid_maternalmort","owid_lifeexp","owid_gdppcap"]
-g=fam[fam.model=="gbdte_auto"].set_index("dataset").loc[order]
+g=fam[fam.model=="gbdte_auto"].set_index("dataset").loc[order]["mean"]
 bb=fam[fam.model.isin(["xgb","lgbm","catboost"])]
-bb=bb.loc[bb.groupby("dataset")["mean"].idxmin()].set_index("dataset").loc[order]
-fig=go.Figure()
-fig.add_bar(x=order, y=g["mean"], error_y=dict(array=g["std"]), name="GBDTE",
-            marker_color=PALETTE["gbdte"])
-fig.add_bar(x=order, y=bb["mean"], error_y=dict(array=bb["std"]),
-            name="best standard booster", marker_color=PALETTE["muted"])
-fig.update_layout(title="GBDTE vs best constant-leaf booster (lower is better)",
-                  yaxis_title="test RMSE (10-bootstrap)", barmode="group")
+bb=bb.loc[bb.groupby("dataset")["mean"].idxmin()].set_index("dataset").loc[order]["mean"]
+impr=((bb-g)/bb*100)  # % RMSE reduction; >0 = GBDTE better (panels differ ~15x in scale,
+                       # so a relative view is the only fair single axis)
+lab=[d.replace("owid_","") for d in order]
+col=[PALETTE["aqua"] if v>1 else PALETTE["muted"] for v in impr.values]
+fig=go.Figure(go.Bar(x=impr.values, y=lab, orientation="h", marker_color=col,
+    text=[f"{v:+.0f}%" for v in impr.values], textposition="outside"))
+fig.add_vline(x=0, line=dict(color=PALETTE["ink"]))
+fig.update_layout(title="GBDTE vs best constant-leaf booster (right = GBDTE wins)",
+                  xaxis_title="% test-RMSE reduction vs best standard booster")
 eda.apply_style(fig).show()''')
 md("""**Verdict.** GBDTE wins on 3 of 4 family panels (12–24%) and ties on GDP; the only peer
 is a manual global-detrend baseline, and it beats the naive linear tree in both mean and
