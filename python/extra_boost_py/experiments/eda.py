@@ -107,4 +107,124 @@ def load_raw(name: str, n_max: int = 20000, seed: int = 0) -> pd.DataFrame:
     return df.reset_index(drop=True)
 
 
-__all__: List[str] = ["DatasetInfo", "RAW_INFO", "REAL_ORDER", "SYNTH_ORDER", "load_raw"]
+import plotly.graph_objects as go
+
+from .realdata import load_real
+from .rolestat import extrapolation_gain, separability_index
+
+# Colours: the validated dataviz reference palette in fixed slot order. GBDTE = blue
+# highlight; boosters recede in muted/warm hues.
+PALETTE = {"gbdte": "#2a78d6", "aqua": "#1baf7a", "yellow": "#eda100", "red": "#e34948",
+           "violet": "#4a3aa7", "orange": "#eb6834", "muted": "#8a8a86",
+           "ink": "#0b0b0b", "grid": "#e6e6e2", "surface": "#fcfcfb", "mid": "#f0efec"}
+MODEL_COLOR = {"gbdte_auto": PALETTE["gbdte"], "gbdte": PALETTE["gbdte"],
+               "gbdte_const": PALETTE["violet"], "detrend_lgbm": PALETTE["aqua"],
+               "lgbm": PALETTE["muted"], "xgb": PALETTE["yellow"],
+               "catboost": PALETTE["orange"], "lgbm_linear": PALETTE["red"]}
+
+
+def apply_style(fig: go.Figure) -> go.Figure:
+    fig.update_layout(template="plotly_white", font=dict(color=PALETTE["ink"], size=13),
+                      paper_bgcolor=PALETTE["surface"], plot_bgcolor=PALETTE["surface"],
+                      margin=dict(l=60, r=20, t=50, b=50), hovermode="closest",
+                      legend=dict(orientation="h", y=1.08, x=0))
+    fig.update_xaxes(gridcolor=PALETTE["grid"], zeroline=False)
+    fig.update_yaxes(gridcolor=PALETTE["grid"], zeroline=False)
+    return fig
+
+
+def column_table(df: pd.DataFrame, name: str) -> pd.DataFrame:
+    meanings = RAW_INFO[name].column_meanings if name in RAW_INFO else {}
+
+    def mean_of(c: str) -> str:
+        if c in meanings:
+            return meanings[c]
+        for pat, txt in meanings.items():          # wildcard like "gfs_*" or "s1..s128"
+            if pat.endswith("*") and c.startswith(pat[:-1]):
+                return txt
+        if "s1..s128" in meanings and c.startswith("s") and c[1:].isdigit():
+            return meanings["s1..s128"]
+        return ""
+
+    rows = []
+    for c in df.columns:
+        s = df[c]
+        ex = s.dropna().iloc[0] if s.notna().any() else ""
+        rows.append({"column": c, "dtype": str(s.dtype),
+                     "missing_%": round(100 * float(s.isna().mean()), 1),
+                     "n_unique": int(s.nunique()), "example": ex, "meaning": mean_of(c)})
+    return pd.DataFrame(rows)[["column", "dtype", "missing_%", "n_unique", "example", "meaning"]]
+
+
+def distribution_fig(df: pd.DataFrame, col: str) -> go.Figure:
+    s = df[col].dropna()
+    fig = go.Figure()
+    if pd.api.types.is_numeric_dtype(s) and s.nunique() > 20:
+        fig.add_histogram(x=np.asarray(s, dtype=float), marker_color=PALETTE["gbdte"], nbinsx=40)
+    else:
+        vc = s.astype(str).value_counts().head(15)[::-1]
+        fig.add_bar(x=vc.values, y=vc.index.tolist(), orientation="h", marker_color=PALETTE["gbdte"])
+    fig.update_layout(title=f"distribution of {col}")
+    return apply_style(fig)
+
+
+def _time_col(name: str) -> str:
+    return {"weather": "fact_time", "sberbank": "timestamp", "homecredit": "date_decision",
+            "latam": "month"}.get(name, "year")
+
+
+def target_over_time_fig(name: str) -> go.Figure:
+    """Target vs time; for OWID a few real countries, else binned mean with split line."""
+    b = load_real(name, seed=0, n_max=20000)
+    fig = go.Figure()
+    if name in _OWID_SLUGS:
+        raw = load_raw(name)
+        for ent, key in zip(["India", "Brazil", "Nigeria", "Germany", "Japan"],
+                            ["gbdte", "aqua", "orange", "violet", "red"]):
+            e = raw[raw["entity"] == ent].sort_values("year")
+            if len(e):
+                fig.add_scatter(x=e["year"], y=e["value"], mode="lines", name=ent,
+                                line=dict(color=PALETTE[key], width=2))
+        fig.update_layout(title=f"{name}: target trajectories (sample countries)",
+                          xaxis_title="year",
+                          yaxis_title=RAW_INFO[name].column_meanings.get("value", "value"))
+    else:
+        df = b.df
+        g = (df.groupby(pd.cut(df["t"], 40, labels=False))
+               .agg(t=("t", "mean"), y=("y", "mean")).dropna())
+        fig.add_scatter(x=g["t"], y=g["y"], mode="lines",
+                        line=dict(color=PALETTE["gbdte"], width=2), name="mean target")
+        fig.add_vline(x=b.cut, line=dict(color=PALETTE["red"], dash="dash"))
+        fig.update_layout(title=f"{name}: mean target over normalised time",
+                          xaxis_title="t", yaxis_title="y")
+    return apply_style(fig)
+
+
+def overview_metrics(name: str) -> dict:
+    b = load_real(name, seed=0, n_max=20000)
+    raw = load_raw(name)
+    tcol = _time_col(name)
+    span = ""
+    if tcol in raw.columns:
+        try:
+            ts = pd.to_datetime(raw[tcol]) if raw[tcol].dtype == object else raw[tcol]
+            span = f"{ts.min()} … {ts.max()}"
+        except Exception:
+            span = f"{raw[tcol].min()} … {raw[tcol].max()}"
+    return {"records": len(raw), "time_span": span, "task": b.task,
+            "features": len(b.partition_cols), "train": len(b.train), "test": len(b.test)}
+
+
+def diagnostic_verdict(name: str) -> dict:
+    b = load_real(name, seed=0, n_max=20000)
+    eg = extrapolation_gain(b)
+    return {"separability": round(separability_index(b), 3), "extrap_gain": round(eg, 3),
+            "promoted": bool(eg >= 0.05),
+            "why": ("green: per-group forward trend headroom" if eg >= 0.05
+                    else "red: no per-group forward trend to extrapolate")}
+
+
+__all__: List[str] = ["DatasetInfo", "RAW_INFO", "REAL_ORDER", "SYNTH_ORDER", "load_raw",
+                      "PALETTE", "MODEL_COLOR", "apply_style", "column_table",
+                      "distribution_fig", "target_over_time_fig", "overview_metrics",
+                      "diagnostic_verdict"]
